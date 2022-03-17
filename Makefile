@@ -1,35 +1,48 @@
 CC = gcc
 CFLAGS = -Wall -g
 
-all: nop gcompress gdecompress bcompress bdecompress encrypt decrypt
+all: server client nop gcompress gdecompress bcompress bdecompress encrypt decrypt
 
-gcompress: gcompress.o
+server: sdstored
 
-gcompress.o: src/gcompress.c
+client: sdstore
 
-gdecompress: gdecompress.o
+sdstored: src/sdstored.c
+			@echo "> Compiling server..."
+			$(CC) $(CFLAGS) src/sdstored.c -o obj/sdstored
 
-gdecompress.o: src/gdecompress.c
+sdstore: src/sdstore.c
+			@echo "> Compiling client..."
+			$(CC) $(CFLAGS) src/sdstore.c -o obj/sdstore
 
-bcompress: bcompress.o
+gcompress: bin/gcompress.c
+			@echo "> Compiling gcompress..."
+			$(CC) $(CFLAGS) bin/gcompress.c -o obj/gcompress
 
-bcompress.o: src/bcompress.c
+gdecompress: bin/gdecompress.c
+			@echo "> Compiling gdecompress..."
+			$(CC) $(CFLAGS) bin/gdecompress.c -o obj/gdecompress
 
-bdecompress: bdecompress.o
+bcompress: bin/bcompress.c
+			@echo "> Compiling bcompress..."
+			$(CC) $(CFLAGS) bin/bcompress.c -o obj/bcompress
 
-bdecompress.o: src/bdecompress.c
+bdecompress: bin/bdecompress.c
+			@echo "> Compiling bdecompress..."
+			$(CC) $(CFLAGS) bin/bdecompress.c -o obj/bdecompress
 
-encrypt: encrypt.o
+encrypt: bin/encrypt.c
+			@echo "> Compiling encrypt..."
+			$(CC) $(CFLAGS) bin/encrypt.c -o obj/encrypt
 
-encrypt.o: src/encrypt.c
+decrypt: bin/decrypt.c
+			@echo "> Compiling decrypt..."
+			$(CC) $(CFLAGS) bin/decrypt.c -o obj/decrypt
 
-decrypt: decrypt.o
-
-decrypt.o: src/decrypt.c
-
-nop: nop.o
-
-nop.o: src/nop.c
+nop: bin/nop.c
+			@echo "> Compiling nop..."
+			$(CC) $(CFLAGS) bin/nop.c -o obj/nop
 
 clean:
-	rm -f *compress *decompress encrypt decrypt nop *.o
+	@echo "> Removing object files..."
+	rm -f obj/*
