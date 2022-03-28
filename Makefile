@@ -9,11 +9,11 @@ client: sdstore
 
 sdstored: src/sdstored.c
 			@echo "> Compiling server..."
-			$(CC) $(CFLAGS) src/sdstored.c -o obj/sdstored
+			$(CC) $(CFLAGS) src/sdstored.c -o sdstored
 
 sdstore: src/sdstore.c
 			@echo "> Compiling client..."
-			$(CC) $(CFLAGS) src/sdstore.c -o obj/sdstore
+			$(CC) $(CFLAGS) src/sdstore.c -o sdstore
 
 gcompress: bin/gcompress.c
 			@echo "> Compiling gcompress..."
