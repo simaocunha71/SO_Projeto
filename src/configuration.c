@@ -1,4 +1,17 @@
 #include "includes/configuration.h"
+#include <string.h>
+
+void mysscanf(char* string, char * name, int *num){
+    char* numero;
+    char* argumento;
+    numero=strdup(string);
+    argumento = strsep(&numero , " ");
+
+    *num=atoi(numero);
+    name=strdup(argumento);
+
+
+}
 
 CONFIG create_config (char* line){
     CONFIG c;
