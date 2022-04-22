@@ -4,15 +4,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../utilities.c"
 
 /**
  * @brief Função que lê uma linha e carrega para o buffer line
  * @param fd File descriptor do ficheiro
  * @param line Buffer
  * @param size Tamanho a ler
+ * @return Nº de bytes lidos
  */
-void readln(int fd, char* line, size_t size);
+size_t readln(int fd, char* line, size_t size);
 
 /**
  * @brief Valida o binário a executar

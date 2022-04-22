@@ -15,34 +15,34 @@ sdstore: src/sdstore.c
 			@echo "> Compiling client..."
 			$(CC) $(CFLAGS) src/sdstore.c -o sdstore
 
-gcompress: bin/gcompress.c
+gcompress: bin/SDStore-transf/gcompress.c
 			@echo "> Compiling gcompress..."
-			$(CC) $(CFLAGS) bin/gcompress.c -o obj/gcompress
+			$(CC) $(CFLAGS) bin/SDStore-transf/gcompress.c -o obj/gcompress
 
-gdecompress: bin/gdecompress.c
+gdecompress: bin/SDStore-transf/gdecompress.c
 			@echo "> Compiling gdecompress..."
-			$(CC) $(CFLAGS) bin/gdecompress.c -o obj/gdecompress
+			$(CC) $(CFLAGS) bin/SDStore-transf/gdecompress.c -o obj/gdecompress
 
-bcompress: bin/bcompress.c
+bcompress: bin/SDStore-transf/bcompress.c
 			@echo "> Compiling bcompress..."
-			$(CC) $(CFLAGS) bin/bcompress.c -o obj/bcompress
+			$(CC) $(CFLAGS) bin/SDStore-transf/bcompress.c -o obj/bcompress
 
-bdecompress: bin/bdecompress.c
+bdecompress: bin/SDStore-transf/bdecompress.c
 			@echo "> Compiling bdecompress..."
-			$(CC) $(CFLAGS) bin/bdecompress.c -o obj/bdecompress
+			$(CC) $(CFLAGS) bin/SDStore-transf/bdecompress.c -o obj/bdecompress
 
-encrypt: bin/encrypt.c
+encrypt: bin/SDStore-transf/encrypt.c
 			@echo "> Compiling encrypt..."
-			$(CC) $(CFLAGS) bin/encrypt.c -o obj/encrypt
+			$(CC) $(CFLAGS) bin/SDStore-transf/encrypt.c -o obj/encrypt
 
-decrypt: bin/decrypt.c
+decrypt: bin/SDStore-transf/decrypt.c
 			@echo "> Compiling decrypt..."
-			$(CC) $(CFLAGS) bin/decrypt.c -o obj/decrypt
+			$(CC) $(CFLAGS) bin/SDStore-transf/decrypt.c -o obj/decrypt
 
-nop: bin/nop.c
+nop: bin/SDStore-transf/nop.c
 			@echo "> Compiling nop..."
-			$(CC) $(CFLAGS) bin/nop.c -o obj/nop
+			$(CC) $(CFLAGS) bin/SDStore-transf/nop.c -o obj/nop
 
 clean:
 	@echo "> Removing object files..."
-	rm -f obj/*
+	rm -f obj/* sdstore sdstored

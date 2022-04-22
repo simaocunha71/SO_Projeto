@@ -5,3 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../config.c"
+
+/**
+ * @brief Inicializa o servidor com o carregamento das configurações do ficheiro de configuração
+ * @param config_filename Ficheiro de configuração
+ * @param binarys_foldername Pasta com os binários a executar
+ * @return Configuração com todos os binários a executar na forma de lista ligada
+ */
+CONFIG start_server(char* config_filename, char* binarys_foldername);
+
+//DEBUG
+void printConfigs(CONFIG c);
