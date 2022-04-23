@@ -22,10 +22,20 @@ int validate_binary_to_execute (char* binary_to_execute){
 
 void redirection (char* filename, int std, int isInput){
     int file;
-    if(isInput == 0)
-        file = open(filename, O_RDONLY, 0640);
-    else
-        file = open(filename, O_RDWR  | O_CREAT | O_TRUNC, 0640);
+    if(isInput == 0){
+
+        if((file = open(filename, O_RDONLY, 0640))==-1){
+            perror("erro no open file redirection");
+            return -1;
+        }
+    }
+    else{
+
+        if((file = open(filename, O_RDWR  | O_CREAT | O_TRUNC, 0640))==-1){
+            perror("erro no open file redirection 2");
+            return -1;
+        }
+    }
     
     dup2(file, std);
     close(file);
