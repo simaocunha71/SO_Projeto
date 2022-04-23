@@ -37,7 +37,11 @@ CONFIG load_configurations (char* config_filename, char* binarys_folder){
     size_t bytes_read = 0;
     char buffer[buf_size];
 
-    int fd = open(config_filename, O_RDONLY, 0660);
+    int fd;
+    if((fd = open(config_filename, O_RDONLY, 0660)) == -1){
+        perror("erro no open fd");
+        return -1;
+    }
 
     while ((bytes_read = readln(fd, buffer, buf_size)) > 0){
         new = create_config(buffer, binarys_folder, c);
