@@ -7,6 +7,9 @@
 void execute_bins(char* input, char* output, char* bins, int size){
     
     int pipe_bn[2];
+    char* ipt = (char*) input;
+
+    CONFIG c = load_configurations("bin/sdstore.conf", "obj/");
 
     for (int i = 0; i < size; i++){
 
@@ -22,8 +25,7 @@ void execute_bins(char* input, char* output, char* bins, int size){
                 close(pipe_bn[0]);
                 dup2(pipe_bn[1],1);
                 close(pipe_bn[1]);
-                //execute_config(idk o que meter aqui,bins[i],input,???);           (talvez criar um ficheiro novo com os resultados
-                //                                                                   e copiar o conteudo para o output)
+                execute_config(c,bins[i],ipt,output);   //???       
                 _exit(0);
 
                 //FALTA: ESCREVER O RESULTADO NO FICHEIRO OUTPUT
@@ -33,11 +35,13 @@ void execute_bins(char* input, char* output, char* bins, int size){
                 close(pipe_bn[1]);
             }
 
-            
+            ipt = output;
         }
     }
     
 }
+
+//$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
 
 int main(int argc, char const *argv[]){
 
