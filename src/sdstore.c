@@ -35,7 +35,7 @@ void execute_bins(char* input, char* output, char* bins, int size){
                 close(pipe_bn[1]);
             }
 
-            ipt = output;
+            ipt = output;               //?????????
         }
     }
     
