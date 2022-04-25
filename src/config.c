@@ -38,10 +38,8 @@ CONFIG load_configurations (char* config_filename, char* binarys_folder){
     char buffer[buf_size];
 
     int fd;
-    if((fd = open(config_filename, O_RDONLY, 0660)) == -1){
-        perror("erro no open fd");
-        return -1;
-    }
+    if((fd = open(config_filename, O_RDONLY, 0660)) == -1)
+        perror("Erro a abrir o ficheiro de configuração");
 
     while ((bytes_read = readln(fd, buffer, buf_size)) > 0){
         new = create_config(buffer, binarys_folder, c);
@@ -55,7 +53,6 @@ CONFIG load_configurations (char* config_filename, char* binarys_folder){
 
 char* get_binary_filename (char* binary_name, char* binary_folder){
     char* res = (char*) malloc(strlen(binary_name) + strlen(binary_folder) + 1);
-    //strcat(res,"../");
     strcat(res, binary_folder);
     strcat(res, binary_name);
     return res;
@@ -64,27 +61,22 @@ char* get_binary_filename (char* binary_name, char* binary_folder){
 void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_file){
     CONFIG c = get_Config(binary_name,cs);
 
-    printf("GET:\n");
-    printf("> Nome: %s\n", c->binary_name);
-    printf("> Num: %d\n", c->max_instances);
-    printf("> Path: %s\n", c->path_name);
+    //printf("GET:\n");
+    //printf("> Nome: %s\n", c->binary_name);
+    //printf("> Num: %d\n", c->max_instances);
+    //printf("> Path: %s\n", c->path_name);
     if (c != NULL){
         redirection(file_to_use,0, 0);
         redirection(new_file,1, 1);
-        char* command_files[] = {c->path_name, file_to_use, new_file, NULL}; //ver pq dá erro
+        char* command_files[] = {c->path_name, file_to_use, new_file, NULL}; 
         //printf("-> Path: %s\n", c->path_name);
         //printf("-> Input: %s\n", file_to_use);
         //printf("-> Output: %s\n", new_file);
 
-        int e = execvp(command_files[0], command_files);
+        execvp(command_files[0], command_files);
+        perror("Erro a executar o binário");
 
-        if(e == -1)
-            printf("Error!\n");
-        else 
-            printf("Success!\n");
     }
-    //./a.out binarioAExecutar ficheiroInput ficheiroOutput
-
 }
 
 CONFIG get_Config(char* binary_name, CONFIG cs){

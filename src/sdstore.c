@@ -1,41 +1,35 @@
 #include "includes/sdstore.h"
-#include "includes/utilities.h"
-#include "includes/config.h"
 
 // Cliente
-
-void execute_bins(char* input, char* output, char* bins, int size){
+void execute_bins(const char* arguments[], int num_args){
     
     int pipe_bn[2];
-    char* ipt = (char*) input;
+    char* input = (char*) arguments[2];
+    char* output = (char*) arguments[3];
 
-    CONFIG c = load_configurations("bin/sdstore.conf", "obj/");
+    CONFIG c = load_configurations("bin/sdstore.conf", "obj/"); //isto provavelmente vai para o servidor e vai ser passado por argumento nesta função
 
-    for (int i = 0; i < size; i++){
+    for (int i = 4; i < num_args; i++){
 
-        if ((strcmp(bins[i],"nop")) != 0) {
+        if ((strcmp(arguments[i],"nop")) != 0) {
 
-            if(pipe(pipe_bn)<0){
-                 perror("PIPE ERROR!!!!!\n");
-                return -1;
-            }
-
+            if(pipe(pipe_bn) < 0)
+                perror("Erro a fazer pipe");
 
             if(fork()==0){
                 close(pipe_bn[0]);
                 dup2(pipe_bn[1],1);
                 close(pipe_bn[1]);
-                execute_config(c,bins[i],ipt,output);   //???       
+                execute_config(c,(char*) arguments[i],input,output);    
                 _exit(0);
 
-                //FALTA: ESCREVER O RESULTADO NO FICHEIRO OUTPUT
             }
             else {
                 wait(NULL);
                 close(pipe_bn[1]);
+                dup2(pipe_bn[0], 0);
+                close(pipe_bn[0]);
             }
-
-            ipt = output;               //?????????
         }
     }
     
@@ -46,20 +40,8 @@ void execute_bins(char* input, char* output, char* bins, int size){
 int main(int argc, char const *argv[]){
 
     if (argc < 5) {
-        printf ("TOO FEW ARGUMENTS!\n");
+        printf ("Nº de argumentos inválido\n");
         return -1;
-    }
-
-    int i,j = 0;
-    char* bins[argc-4];
-
-    char* file_input = (char*) argv[2];
-    char* file_output = (char*) argv[3];
-
-    for (i = 4; i < argc; i++)
-    {
-        bins[j] = strdup(argv[i]);
-        j++;
     }
 
 /*
@@ -68,12 +50,14 @@ int main(int argc, char const *argv[]){
 
     for (i = 0; i < argc-4; i++)
     {
-        printf("Bin nº %d: %s\n",i+1,bins[i]);
+        printf("Bin nº %d: %s\n",i+1,binaries_to_execute[i]);
     }
     
 */
-
-    execute_bins(file_input,file_output,bins,argc-4);
+    if ((strcmp(argv[1], "proc-file") == 0))
+        execute_bins(argv, argc);
+    else
+        printf("DEBUG: Provavelmente falta a flag \"proc-file\"\n");
 
     return 0;
 }
