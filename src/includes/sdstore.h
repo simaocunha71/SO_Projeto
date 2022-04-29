@@ -15,4 +15,4 @@
  * @param arguments argv
  * @param num_args argc
  */
-void execute_bins(const char* arguments[], int num_args);
+void execute_bins(char* arguments[], int num_args);

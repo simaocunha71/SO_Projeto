@@ -51,3 +51,5 @@ char* get_binary_filename (char* binary_name, char* binary_folder);
  * @return CONFIG Configuração pretendida
  */
 CONFIG get_Config(char* binary_name, CONFIG cs);
+
+char* mystrcat(char* a, char* b);

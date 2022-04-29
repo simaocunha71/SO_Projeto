@@ -97,3 +97,9 @@ CONFIG get_Config(char* binary_name, CONFIG cs){
     else
         return NULL;
 }
+
+char* mystrcat(char* a, char* b){
+    a = realloc(a, (strlen(a)+strlen(b))+1);
+    strcat(a,b);
+    return a;
+}

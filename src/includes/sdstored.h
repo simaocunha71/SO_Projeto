@@ -17,3 +17,7 @@ CONFIG start_server(char* config_filename, char* binarys_foldername);
 
 //DEBUG
 void printConfigs(CONFIG c);
+
+int execcommands(int nc,char **cmd, char* path, char* input, char* output);
+void statusfunction();
+int sendtoclient(int nr);
