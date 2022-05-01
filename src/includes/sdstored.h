@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+
 
 #include "../config.c"
 
@@ -18,6 +20,16 @@ CONFIG start_server(char* config_filename, char* binarys_foldername);
 //DEBUG
 void printConfigs(CONFIG c);
 
+/**
+ * @brief Executa os comandos dados pelo cliente
+ * 
+ * @param nc numero de comandos
+ * @param cmd lista dos comandos
+ * @param path local para executar os comandos
+ * @param input file input
+ * @param output file output
+ * @return 0 if everything goes right
+ */
 int execcommands(int nc,char **cmd, char* path, char* input, char* output);
 void statusfunction();
 int sendtoclient(int nr);
