@@ -34,3 +34,54 @@ void redirection (char* filename, int std, int isInput){
     dup2(file, std);
     close(file);
 }
+
+char* inttoString(int n){
+   char* string = malloc(sizeof(int));
+   if(n == 0) { 
+       string[0] = '0'; 
+       return "\0";
+   };
+   int modResult;
+   int length = 0;
+   int isNegative = 0;
+   int copyOfNumber = n;
+
+   if(n < 0) {
+     isNegative = 1;
+     n = 0 - n;
+     length++;
+   }
+
+   while(copyOfNumber != 0){ 
+       length++;
+       copyOfNumber /= 10;
+   }
+
+   for(int divide = 0; divide < length; divide++) {
+     modResult = n % 10;
+     n = n / 10;
+     string[length - (divide + 1)] = modResult + '0';
+   }
+   if(isNegative)
+       string[0] = '-';
+   string[length] = '\0';
+
+   return string;
+}
+
+char** add_string_to_array(char** array_of_strings, const char* string_to_add){
+    int num_strings_already_existing = 0;
+    while (array_of_strings[num_strings_already_existing] != NULL){        
+        num_strings_already_existing++;
+    }
+    array_of_strings[num_strings_already_existing] = strdup(string_to_add);
+    strcpy(array_of_strings[num_strings_already_existing], string_to_add);
+    char** aux = realloc(array_of_strings, (num_strings_already_existing+2) * sizeof(char *));
+    if(aux == NULL)
+        perror("Erro a fazer realloc na adição de strings a arrays");
+    else {
+        array_of_strings = aux;
+        array_of_strings[num_strings_already_existing+1] = NULL;
+    }
+    return array_of_strings;
+}

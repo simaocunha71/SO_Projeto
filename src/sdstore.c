@@ -35,89 +35,113 @@ void execute_bins(char* arguments[], int num_args){
     
 }
 
-
-
-//$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
-
-int main(int argc, char *argv[]){
-
-    //caso que o argumento do cliente seja so "status"
-    if(!strcmp(argv[1], "status")){
-        int fifo_status=open("comunication", O_WRONLY);
-
-        if(fifo_status < 0){
-            perror("open");
-            return 1;
-        }
-
-        write(fifo_status,argv[1],strlen(argv[1]));
-        close(fifo_status);
-        return 0;
-    }
-    else if (argc < 5) {
-        printf ("Nº de argumentos inválido\n");
+int execute_status(char* str_status){
+    int fifo_status = open("status_fifo", O_WRONLY);
+    if(fifo_status < 0){
+        perror("Erro a abrir o pipe para o comando \"status\"");
         return -1;
     }
-    //pid do cliente para usar como nome do pipe de comunicacao do cliente->servidor
-    int pid=getpid();
+    write(fifo_status,str_status,strlen(str_status));
+    close(fifo_status);
+    return 0;
+}
 
-    //string aonde vai ter toda a informação enviada para o servidor
-    char* pipeinfo=malloc(100);
-    
-    //eu sei que sprintf n devia ser usado mas é só usado para meter o numero do pid no pipeinfo
-    sprintf(pipeinfo, "%d", pid);
+//$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
+int main(int argc, char *argv[]){
 
-    //lembrar de separar todos os argumentos por espaço, para quando o servidor ler, conseguir-mos facilmente separar os argumentos
-    pipeinfo=mystrcat(pipeinfo, " ");
-
-    //este ciclo for separa todos os argumentos enviados para o servidor
-    for(int i =2; i<argc; i++){
-        pipeinfo = mystrcat(pipeinfo, argv[i]);
-        pipeinfo=mystrcat(pipeinfo, " ");
+    if (argc < 5) {
+        perror ("Nº de argumentos inválido! Tenta outra vez...");
+        return -1;
     }
+    
+    if(strcmp(argv[1], "status") == 0){
+        return execute_status(argv[1]);
+    }
+    else if(strcmp(argv[1], "proc-file") == 0){
 
+        /***************************************Envio do pedido do cliente**************************************************/
+        //pid do cliente para usar como nome do pipe de comunicacao do cliente->servidor
+        int pid_client = getpid();
+        char* str_pid_client = inttoString(pid_client);
 
+        int size_of_args = 0;
+        for(int i = 2; i < argc; i++)
+            size_of_args += strlen(argv[i]);
 
+        //String aonde vai ter toda a informação enviada para o servidor: capacidade para o pid + tamanho das strings que compoe a informação
+        //Formato desta string com, por exemplo, 2 binários a executar: "PID_Cliente File_Input File_Output Binario1 Binario2"
+        char* info_toSend = malloc(sizeof(char) * (sizeof(int) + size_of_args + 1));
+        strcat(info_toSend, str_pid_client);
+        strcat(info_toSend, " "); 
 
-    //abrimos o pipe aonde o server vai escrever para o ciente
-    char* pipo=malloc(100);
-    //meter o pid em string
-    sprintf(pipo, "%d", pid);
-
-    //criamos o pipe com o pid do cliente
-    if(mkfifo(pipo, 0666)<0){
-            perror("mkfifo client");
+        //Parse dos nomes dos argumentos
+        for(int i = 2; i < argc; i++){
+            strcat(info_toSend, argv[i]);
+            if(i < argc - 1)
+                strcat(info_toSend, " ");
         }
-    //vamos abrir o pipe de comunicaçao para escrever la dentro o que queremos enviar
-    int fifo_fd;
-    if((fifo_fd=open("comunication", O_WRONLY))< 0){
-        perror("open");
-        return 1;
+
+        //abrimos o pipe cliente->servidor
+        char* identifier_fifo = "_execute_fifo_request"; //formato do nome do fifo: [INT]_execute_fifo (ex: 3519_execute_fifo_request)
+        char* fifo_request = malloc(sizeof(char) * (sizeof(int) + strlen(identifier_fifo)));
+        strcat(fifo_request, str_pid_client);
+        strcat(fifo_request, identifier_fifo);
+
+        //criamos o pipe com o pid do cliente
+        if(mkfifo(fifo_request, 0666) < 0)
+            perror("Erro a fazer o pipe do cliente para o servidor");
+
+        //vamos abrir o pipe cliente->servidor
+        int fifo_fd;
+        if((fifo_fd = open(fifo_request, O_WRONLY))< 0){
+            perror("Erro a criar o nome para o fifo de execução de binários");
+            return -1;
+        }
+
+        //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
+        write(fifo_fd,info_toSend,strlen(info_toSend));
+
+        //fechamos o pipe cliente->servidor
+        close(fifo_fd);
+
+        //////////////////////////////////////////////////////////////////////////////
+        //NOTA:
+        //abrimos este pipe primeiro pq senao pode dar conflito mais tarde no servidor
+        //////////////////////////////////////////////////////////////////////////////
+
+        /***************************************Resposta recebida pelo cliente**********************************************/
+        //Abrimos o descritor de leitura
+        int results;
+        if((results = open(fifo_request, O_RDONLY))<0){
+            perror("Erro a abrir o fifo com o pedido do cliente");
+            return -1;
+        }
+        //Inicializar o buffer para leitura
+        int size_buffer = 1024;
+        char buffer[size_buffer];
+        ssize_t bytes_read;
+
+
+        //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
+        while((bytes_read = read(results,buffer,size_buffer)) > 0){
+            write(1,buffer,bytes_read);
+        }
+
+        close(results);
+        unlink(fifo_request);
     }
-    //escrever tudo que temos para escrever para o servidor    
-    write(fifo_fd,pipeinfo,strlen(pipeinfo));
-    //fechamos o pipe
-    close(fifo_fd);
-
-    
-    //abrimos este pipe primeiro pq senao pode dar conflito mais tarde no servidor
-
-
-    //e abrimos o descritor de leitura
-    int results;
-    if((results=open(pipo, O_RDONLY))<0){
-        perror("open results");
-        return 1;
+    else {
+        perror("Comando desconhecido! Tenta outra vez...");
+        return -1;
     }
-    //inicializar o buffer para leitura
-    char buffer[1024];
-    ssize_t bytes_read;
+
+    return 0;
+}
 
 
-    //lemos e escrevemos no terminal tudo o que o servidor quer nos enviar.
-    while((bytes_read = read(results,buffer,1024)) > 0){
-        write(1,buffer,bytes_read);
-    }
+
+
+
 
 
 /*
@@ -134,7 +158,3 @@ int main(int argc, char *argv[]){
     else
         printf("DEBUG: Provavelmente falta a flag \"proc-file\"\n");
 */
-    close(results);
-    unlink(pipo);
-    return 0;
-}

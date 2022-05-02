@@ -28,3 +28,19 @@ int validate_binary_to_execute (char* binary_to_execute);
  * @param flag Diz se é ficheiro de input (0) ou de output (> 0)
  */
 void redirection (char* filename, int std, int isInput);
+
+/**
+ * @brief Função que converte um numero em string, guardando o resultado em 'string'.
+ * Adaptada de https://stackoverflow.com/questions/11819837/converting-integer-to-string-in-c-without-sprintf, do utilizador ExternCowWindows
+ * @param n Numero a converter
+ * @return String com o numero convertido
+ */
+char* inttoString(int n);
+
+/**
+ * @brief Adiciona uma string a um array dinâmico de strings
+ * @param array_of_strings Array dinâmico de strings
+ * @param string_to_add String a adicionar
+ * @return char** String atualizada
+ */
+char** add_string_to_array(char** array_of_strings, const char* string_to_add);

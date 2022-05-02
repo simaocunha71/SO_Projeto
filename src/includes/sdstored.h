@@ -6,8 +6,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
-
 #include "../config.c"
+
+#define BUFFERSIZE 1024
 
 /**
  * @brief Inicializa o servidor com o carregamento das configurações do ficheiro de configuração
