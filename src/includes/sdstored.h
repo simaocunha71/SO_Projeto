@@ -22,15 +22,16 @@ CONFIG start_server(char* config_filename, char* binarys_foldername);
 void printConfigs(CONFIG c);
 
 /**
- * @brief Executa os comandos dados pelo cliente
- * 
- * @param nc numero de comandos
- * @param cmd lista dos comandos
- * @param path local para executar os comandos
- * @param input file input
- * @param output file output
- * @return 0 if everything goes right
+ * @brief Executa vários binários com recurso a pipes anónimos, guardando o resultado no ficheiro de output
+ * @param c Lista ligada de configurações
+ * @param input Ficheiro de input
+ * @param output Ficheiro de output
+ * @param binaries_array Array de binários a executar
+ * @param number_of_commands Número de binários a executar
+ * @return int 0 se sucesso, -1 caso contrário
  */
-int execcommands(int nc,char **cmd, char* path, char* input, char* output);
+int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** binaries_array, int number_of_commands);
+
 void statusfunction();
+
 int sendtoclient(int nr);

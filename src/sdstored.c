@@ -7,7 +7,7 @@
 
 CONFIG start_server(char* config_filename, char* binarys_folder){
     CONFIG c = load_configurations(config_filename, binarys_folder);
-    printConfigs(c);
+    //printConfigs(c);
     return c;
 }
 
@@ -23,92 +23,73 @@ void sendServerStatus(){
     printf("Opção ainda não implementada!\n");
 }
 
-int execcommands(int nc,char **cmd, char* path, char* input, char* output){
-    int input_fd, output_fd;
-    //abre o input pra onde lemos
-    if((input_fd= open(input, O_RDONLY))==-1){
-        perror("input_fd open");
-    }
+int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** binaries_array, int number_of_commands){
 
-    //abre o output para onde vamos escrever
-    if((output_fd=open(output, O_WRONLY | O_CREAT | O_TRUNC, 0640))==-1){
-        perror("output_fd open");
-    }
-
-    //printf("%d | %s | %s | %s\n", nc, path, input, output);
-
-    //guardamos o standard output pra debugging
-    int stdout = dup(1);
-    //mudamos o input default pra o nosso ficheiro de input
-    dup2(input_fd, 0);
-    //mudamos o output default pra o nosso ficheiro output
-    dup2(output_fd,1);
-    //fechamos o input e o output pq os execs vao usar o 0 e 1
-    close(input_fd);
-    close(output_fd);
+    redirection(input,0,1);
+    redirection(output,1,1);
 
     //criamos os pipes necessarios pra executar todos os comandos
-    int p[nc-1][2];
+    int p[number_of_commands-1][2];
     int i,status;
-    nc--;
-    //caso so haja um comando
-    if(nc == 1){
-        if(fork()==0){
+    number_of_commands--;
 
-        //mystrcat(path, cmd[0]);
-        execl(path, cmd[0], NULL);
-        _exit(0);
+    //caso so haja um comando
+    if(number_of_commands == 1){
+        if(fork() == 0){
+            execute_config(c,binaries_array[0],input, output);
+            exit(0);
         }
         wait(NULL);
     }
     else{
-
-    for (i=0; i<nc; i++){
-      if (i==0){
-        pipe(p[i]);
-        if (fork()==0){
-          close(p[i][0]);
-          dup2(p[i][1],1);
-          close(p[i][1]);
-          //mystrcat(path, cmd[i]);
-          //write(stdout,path,strlen(path));
-          execl(path, cmd[i], NULL);
-          _exit(0);
+        for (i = 0; i < number_of_commands; i++){
+            if (i == 0){
+                pipe(p[i]);
+                if (fork()==0){
+                    close(p[i][0]);
+                    dup2(p[i][1],1);
+                    close(p[i][1]);
+                    execute_config(c,binaries_array[i],input, output);
+                    _exit(0);
+                }       
+                else
+                    close(p[i][1]);
+            }
+            else if (i == number_of_commands - 1){
+                if (fork()==0){
+                    dup2(p[i-1][0],0);
+                    close(p[i-1][0]);
+                    execute_config(c,binaries_array[i],input, output);
+                    _exit(0);
+                }
+                else 
+                    close(p[i-1][0]);
+            }
+            else {
+                pipe(p[i]);
+                if (fork() == 0){
+                    close(p[i][0]);
+                    dup2(p[i][1],1);
+                    close(p[i][1]);
+                    dup2(p[i-1][0],0);
+                    close(p[i-1][0]);
+                    execute_config(c,binaries_array[i],input, output);
+                    _exit(0);
+                }
+                else {
+                    close(p[i][1]);
+                    close(p[i-1][0]);
+                }
+            }
         }
-        else close(p[i][1]);
-      }
-      else if (i==nc-1){
-        if (fork()==0){
-          dup2(p[i-1][0],0);
-          close(p[i-1][0]);
-          //mystrcat(path, cmd[i]);
-          execl(path, cmd[i], NULL);
-          _exit(0);
-        }
-        else close(p[i-1][0]);
-      }
-      else {
-        pipe(p[i]);
-        if (fork()==0){
-          close(p[i][0]);
-          dup2(p[i][1],1);
-          close(p[i][1]);
-          dup2(p[i-1][0],0);
-          close(p[i-1][0]);
-          //mystrcat(path, cmd[i]);
-          execl(path, cmd[i], NULL);
-          _exit(0);
-        }
-        else {
-          close(p[i][1]);
-          close(p[i-1][0]);
-        }
-      }
-    }
-    for (i=0; i<nc; i++) wait(&status);
+        
+        for (i = 0; i < number_of_commands; i++) 
+            wait(&status);
     }
     return 0;
 }
+
+
 
 int sendtoclient(int nr){
     printf("A implementar!\n");
@@ -123,7 +104,7 @@ int main(int argc, char const *argv[]){
     char* binarys_folder = (char*) argv[2];
 
 
-    //CONFIG c = start_server(filename_config, binarys_folder);
+    CONFIG c = start_server(filename_config, binarys_folder);
     //execute_config(c,"bdecompress","test_files/bfile.bz2","test_files/new.csv");
 
 
@@ -148,7 +129,7 @@ int main(int argc, char const *argv[]){
     printf("[SV]: Abri descritor de sobrevivencia\n");
 
     //Array dinâmico com todos os binarios a executar
-    char** binaries_to_execute;
+    char** binaries_to_execute = NULL;
 
     //buffer para ler e escrever
     char buffer_from_fifo[BUFFERSIZE];
@@ -159,19 +140,9 @@ int main(int argc, char const *argv[]){
 
     while((bytes_read = read(fifo_fd,buffer_from_fifo,BUFFERSIZE)) > 0){
         char* buffer_copy = strdup(buffer_from_fifo); //necessário fazer esta cópia porque o buffer_from_fifo vai ficar destruído depois do parse
-        // char* pipo=malloc(100);
 
-        //clientpid para saber que pipe escrever para!
         char* client_pid = strdup(strsep(&buffer_copy, " "));
-        //write(1,buffer, strlen(buffer));
-        //write(1,clientpid, strlen(clientpid));
-
-        //abrimos aqui o pipe para escrever para o cliente
-        //criamos o pipe com o clientpid
-        /*
-        write(1,pipo,strlen(pipo));
-        write(1,clientpid,strlen(clientpid));
-        */
+        char* operation_mode = strdup(strsep(&buffer_copy, " "));
 
         write(1, buffer_from_fifo, strlen(buffer_from_fifo));
         printf("[SV]: Enviei mensagem para cliente com pid\n");
@@ -193,13 +164,23 @@ int main(int argc, char const *argv[]){
 
         
         //Execução do comando "status"
-        if(strcmp(buffer_copy, "status") == 0){
-            //TODO
-            sendServerStatus();
+        if(strcmp(operation_mode, "S") == 0){
+            char* executing_message = "STATUS executing...\n";
+            write(client_write, executing_message, strlen(executing_message));
+
+            /*
+            
+                Inserir o algoritmo para o comando status
+            
+            */
+
+            char* success_message = "STATUS done!\n";
+            write(client_write, success_message, strlen(success_message));
+            close(fifo_fd);
         }
         
         //Execução do comando "proc-file"
-        if(strcmp(buffer_copy, "proc-file") == 0){
+        if(strcmp(operation_mode, "P") == 0){
 
             /////////////////////////////////Funcionalidade extra////////////////////////////
             //esta priority como ainda n ta implementada os comandos de execucao nao irao usar
@@ -210,37 +191,45 @@ int main(int argc, char const *argv[]){
             
             char* inputfile = strdup(strsep(&buffer_copy, " "));
             char* outputfile= strdup(strsep(&buffer_copy, " "));
-            int i;
-            
+
+            int number_of_commands;
+
             //Parse dos binários a executar
-            for(i = 0;buffer_copy != NULL; i++){
-                binaries_to_execute = add_string_to_array(binaries_to_execute, strdup(strsep(&buffer_copy, " ")));
+            for(number_of_commands = 0;buffer_copy != NULL; number_of_commands++){
+                binaries_to_execute = add_string_to_array(binaries_to_execute, strdup(strsep(&buffer_copy, " "))); //está a crashar aqui
             }
+
+            //for (int i = 0; i < number_of_commands; i++){
+            //    printf("||%s\n",binaries_to_execute[i]);
+            //}
+            
             
             //Escrever ao cliente que vamos executar o pedido dele
             char* executing_message = "executing...\n";
             write(client_write, executing_message, strlen(executing_message));
 
-            ////funcao de execução de comandos
-            //if(fork()==0){
-            //    if(execcommands(i, binaries_to_execute, strdup(binarys_folder), inputfile, outputfile) < 0){ //TODO:alterar para a nossa estrutura de dados
-            //        perror("Erro a efetuar a execução dos binários");
-            //    }
-//
+            //Pipeline dos comandos a executar
+            if(fork() == 0){
+                if(execute_commands_in_pipeline(c,inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
+                    perror("Erro a efetuar a execução da pipeline dos binários");
+                }
+
                 close(client_write);
+                close(fifo_fd_write);
                 printf("[SV]: Fechei descritor de comunicação com clientes\n");
-            //    close(fifo_fd);
-            //    //close(fifo_fd_write);
-            //    exit(0);
-            //}
-            //wait(NULL);
+
+                close(fifo_fd);
+                exit(0);
+            }
+            wait(NULL);
+            
+            //escrevemos no cliente no cliente que concluímos o pedido deles
+            char* success_message = "done!\n";
+            write(client_write, success_message, strlen(success_message));
+
+            write(client_write, outputfile, strlen(outputfile));
         }
 
-        //escrevemos no cliente no cliente que concluímos o pedido deles
-        char* success_message = "done!\n";
-        write(client_write, success_message, strlen(success_message));
-
-        write(client_write, client_pid, strlen(client_pid));
         
         //fechamos o pipe para aonde enviamos a informação ao cliente
         close(client_write);
@@ -270,14 +259,4 @@ int main(int argc, char const *argv[]){
 printf("----MAIN----\nCF: %s\nBF: %s\n------------\n", filename_config,binarys_folder);
 //execute_config(c,"bcompress","test_files/file.csv","test_files/bfile.bz2");
 return 0;
-*/
-
-
-/*
-TODO:
-> colocar so um fifo "fifo"
-> ...
-
-
-
 */

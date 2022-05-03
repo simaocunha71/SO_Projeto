@@ -79,6 +79,7 @@ void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_
     }
 }
 
+//Talvez diminuir ao nº de instancias para fazer algum controlo de binarios nesta funçao
 CONFIG get_Config(char* binary_name, CONFIG cs){
     CONFIG c = malloc (sizeof (struct configuration));
     int found = 0;
@@ -92,8 +93,5 @@ CONFIG get_Config(char* binary_name, CONFIG cs){
         }
         cs = cs->next;
     }
-    if (c != NULL)
-        return c;
-    else
-        return NULL;
+    return c;
 }

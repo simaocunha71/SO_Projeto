@@ -3,39 +3,6 @@
 #define FIFO_NAME "fifo"
 
 // Cliente
-void execute_bins(char* arguments[], int num_args){
-    
-    int pipe_bn[2];
-    char* input = (char*) arguments[2];
-    char* output = (char*) arguments[3];
-
-    CONFIG c = load_configurations("bin/sdstore.conf", "obj/"); //isto provavelmente vai para o servidor e vai ser passado por argumento nesta função
-
-    for (int i = 4; i < num_args; i++){
-
-        if ((strcmp(arguments[i],"nop")) != 0) {
-
-            if((pipe(pipe_bn)) < 0)
-                perror("Erro a fazer pipe");
-
-            if(fork()==0){
-                close(pipe_bn[0]);
-                dup2(pipe_bn[1],1);
-                close(pipe_bn[1]);
-                execute_config(c,(char*) arguments[i],input,output);    
-                _exit(0);
-
-            }
-            else {
-                wait(NULL);
-                close(pipe_bn[1]);
-                dup2(pipe_bn[0], 0);
-                close(pipe_bn[0]);
-            }
-        }
-    }
-    
-}
 
 int execute_status(char* str_status){
     int fifo_status = open(FIFO_NAME, O_WRONLY);
@@ -60,9 +27,10 @@ int main(int argc, char *argv[]){
     if (argc < 5 && strcmp(argv[1], "proc-file") != 0) {
         perror ("Nº de argumentos inválido! Tenta outra vez...");
     }
+
     
     if(strcmp(argv[1], "status") == 0){
-        return execute_status(argv[1]);
+        return execute_status(argv[1]); //TODO
     }
     else if(strcmp(argv[1], "proc-file") == 0){
 
@@ -77,9 +45,10 @@ int main(int argc, char *argv[]){
 
         //String aonde vai ter toda a informação enviada para o servidor: capacidade para o pid + tamanho das strings que compoe a informação
         //Formato desta string com, por exemplo, 2 binários a executar: "PID_Cliente File_Input File_Output Binario1 Binario2"
-        char* info_toSend = malloc(sizeof(char) * (sizeof(int) + size_of_args + 1));
+        char* info_toSend = malloc(sizeof(char) * (sizeof(int) + strlen(argv[1]) + size_of_args + 1));
         strcat(info_toSend, str_pid_client);
         strcat(info_toSend, " "); 
+        strcat(info_toSend, "P ");//flag para proc-file
 
         //Parse dos nomes dos argumentos
         for(int i = 2; i < argc; i++){
