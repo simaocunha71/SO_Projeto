@@ -1,5 +1,7 @@
 #include "includes/sdstored.h"
 
+#define FIFO_NAME "fifo"
+
 // Servidor
 
 
@@ -114,31 +116,36 @@ int sendtoclient(int nr){
 
 }
 
+//Apagar fifos pela bash: find . -type p -delete
 //./sdstored bin/sdstore.conf obj/
 int main(int argc, char const *argv[]){
     char* filename_config = (char*) argv[1];
     char* binarys_folder = (char*) argv[2];
 
 
-    CONFIG c = start_server(filename_config, binarys_folder);
+    //CONFIG c = start_server(filename_config, binarys_folder);
     //execute_config(c,"bdecompress","test_files/bfile.bz2","test_files/new.csv");
 
 
     //abre o pipe com nome pra estabelecer a ligaçao do server
-    if((mkfifo("server_fifo", 0666)) < 0){
+    if((mkfifo(FIFO_NAME, 0666)) < 0){
         perror("Erro a criar o fifo do servidor");
     }
-    int fifo_fd , fifo_fd_write;
+    printf("[SV]: Criei FIFO\n");
+    int fifo_fd, fifo_fd_write;
 
-    //descritor de comunicação para ler o que o cliente vai enviar
-    if((fifo_fd = open("server_reader_fifo", O_RDONLY)) < 0){
-        perror("Erro a abrir o descritor de leitura do fifo do servidor");
+    
+    if((fifo_fd = open(FIFO_NAME, O_RDONLY)) < 0){
+        perror("Erro a abrir o descritor de comunicação com clientes");
     }
+    printf("[SV]: Abri descritor de comunicação com clientes\n");
+
 
     //para o server estar sempre a funcionar, temos este descritor SEMPRE aberto (nunca o vamos usar)
-    if((fifo_fd_write = open("server_writer_fifo", O_WRONLY)) < 0){
-        perror("Erro a abrir o descritor de escrita do fifo do servidor");
+    if((fifo_fd_write = open(FIFO_NAME, O_WRONLY)) < 0){
+        perror("Erro a abrir o descritor de sobrevivência do servidor");
     }
+    printf("[SV]: Abri descritor de sobrevivencia\n");
 
     //Array dinâmico com todos os binarios a executar
     char** binaries_to_execute;
@@ -165,16 +172,15 @@ int main(int argc, char const *argv[]){
         write(1,pipo,strlen(pipo));
         write(1,clientpid,strlen(clientpid));
         */
-        
-        char* identifier_fifo = "_execute_fifo_reply"; //formato do nome do fifo: [INT]_execute_fifo_reply (ex: 3519_execute_fifo_reply)
-        char* fifo_reply = malloc(sizeof(char) * (sizeof(int) + strlen(identifier_fifo)));
-        strcat(fifo_reply, client_pid);
-        strcat(fifo_reply, identifier_fifo);
+
+        write(1, buffer_from_fifo, strlen(buffer_from_fifo));
+        printf("[SV]: Enviei mensagem para cliente com pid\n");
 
         int client_write;
-        if((client_write = open(fifo_reply, O_WRONLY)) < 0){
+        if((client_write = open(client_pid, O_WRONLY)) < 0){
             perror("Erro a abrir o descritor do fifo do cliente");
         }
+        printf("[SV]: Abri descritor de cliente com pid\n");
 
         char* pending_message = "pending...\n";
         write(client_write, pending_message, strlen(pending_message));
@@ -215,36 +221,45 @@ int main(int argc, char const *argv[]){
             char* executing_message = "executing...\n";
             write(client_write, executing_message, strlen(executing_message));
 
-            //funcao de execução de comandos
-            if(fork()==0){
-                if(execcommands(i, binaries_to_execute, strdup(binarys_folder), inputfile, outputfile) < 0){ //TODO:alterar para a nossa estrutura de dados
-                    perror("Erro a efetuar a execução dos binários");
-                }
-
+            ////funcao de execução de comandos
+            //if(fork()==0){
+            //    if(execcommands(i, binaries_to_execute, strdup(binarys_folder), inputfile, outputfile) < 0){ //TODO:alterar para a nossa estrutura de dados
+            //        perror("Erro a efetuar a execução dos binários");
+            //    }
+//
                 close(client_write);
-                close(fifo_fd);
-                close(fifo_fd_write);
-                exit(0);
-            }
-            wait(NULL);
+                printf("[SV]: Fechei descritor de comunicação com clientes\n");
+            //    close(fifo_fd);
+            //    //close(fifo_fd_write);
+            //    exit(0);
+            //}
+            //wait(NULL);
         }
 
         //escrevemos no cliente no cliente que concluímos o pedido deles
         char* success_message = "done!\n";
         write(client_write, success_message, strlen(success_message));
+
+        write(client_write, client_pid, strlen(client_pid));
         
         //fechamos o pipe para aonde enviamos a informação ao cliente
         close(client_write);
+        printf("[SV]: Fechei descritor de cliente com pid\n");
     }
-    printf("\n%d\n",errno); //???
+    
+    //printf("Código de erro: %d\n",errno); //???
 
-    //fechamos o comunication pipe quando paramos de ler cenas, que devia ser nunca que nao deveria ser possivel sair do ciclo while por agora
-    //close(fifo_fd);
 
-   //Fecho do servidor - para já fecha se escrevermos no terminal do servidor 'server end'
-   if(read(0,"server end",strlen("server end"))){
-        unlink("comunication");
-   }
+   //******************Fecho do servidor***********************
+   //char end_buffer[11];
+   //while(readln(STDIN_FILENO,end_buffer,strlen(end_buffer)) > 0){
+   //    if(strcmp(end_buffer, "end server") == 0){
+   //         unlink(FIFO_NAME);
+   //         printf("[SV]: Apaguei fifo\n");
+   //    }
+   //    else printf("[SV]: Continuo a dar...\n");
+   //
+   //}
 
    return 0;
    
@@ -255,4 +270,14 @@ int main(int argc, char const *argv[]){
 printf("----MAIN----\nCF: %s\nBF: %s\n------------\n", filename_config,binarys_folder);
 //execute_config(c,"bcompress","test_files/file.csv","test_files/bfile.bz2");
 return 0;
+*/
+
+
+/*
+TODO:
+> colocar so um fifo "fifo"
+> ...
+
+
+
 */

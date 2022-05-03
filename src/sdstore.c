@@ -1,5 +1,7 @@
 #include "includes/sdstore.h"
 
+#define FIFO_NAME "fifo"
+
 // Cliente
 void execute_bins(char* arguments[], int num_args){
     
@@ -36,22 +38,27 @@ void execute_bins(char* arguments[], int num_args){
 }
 
 int execute_status(char* str_status){
-    int fifo_status = open("status_fifo", O_WRONLY);
+    int fifo_status = open(FIFO_NAME, O_WRONLY);
+    printf("[Cli]: Abri descritor de fifo\n");
     if(fifo_status < 0){
-        perror("Erro a abrir o pipe para o comando \"status\"");
+        perror("Erro a abrir o descritor do pipe para o comando \"status\"");
         return -1;
     }
     write(fifo_status,str_status,strlen(str_status));
     close(fifo_status);
+    printf("[Cli]: Fechei descritor de fifo\n");
     return 0;
 }
 
 //$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
 int main(int argc, char *argv[]){
 
-    if (argc < 5) {
+    if (argc < 2 && strcmp(argv[1], "status") != 0) {
         perror ("Nº de argumentos inválido! Tenta outra vez...");
-        return -1;
+    }
+    
+    if (argc < 5 && strcmp(argv[1], "proc-file") != 0) {
+        perror ("Nº de argumentos inválido! Tenta outra vez...");
     }
     
     if(strcmp(argv[1], "status") == 0){
@@ -81,28 +88,27 @@ int main(int argc, char *argv[]){
                 strcat(info_toSend, " ");
         }
 
-        //abrimos o pipe cliente->servidor
-        char* identifier_fifo = "_execute_fifo_request"; //formato do nome do fifo: [INT]_execute_fifo (ex: 3519_execute_fifo_request)
-        char* fifo_request = malloc(sizeof(char) * (sizeof(int) + strlen(identifier_fifo)));
-        strcat(fifo_request, str_pid_client);
-        strcat(fifo_request, identifier_fifo);
-
         //criamos o pipe com o pid do cliente
-        if(mkfifo(fifo_request, 0666) < 0)
-            perror("Erro a fazer o pipe do cliente para o servidor");
+        if(mkfifo(str_pid_client, 0666) < 0)
+            perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
+
+        printf("[Cli]: Criei fifo com pid\n");
 
         //vamos abrir o pipe cliente->servidor
-        int fifo_fd;
-        if((fifo_fd = open(fifo_request, O_WRONLY))< 0){
-            perror("Erro a criar o nome para o fifo de execução de binários");
+        int fifo_send_fd;
+        if((fifo_send_fd = open(FIFO_NAME, O_WRONLY)) < 0){
+            perror("Erro a criar o descritor para o pipe do comando \"proc-file\" (resposta do servidor)");
             return -1;
         }
 
+        printf("[Cli]: Abri descritor de pid de cliente com pid\n");
+
         //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_fd,info_toSend,strlen(info_toSend));
+        write(fifo_send_fd,info_toSend,strlen(info_toSend));
 
         //fechamos o pipe cliente->servidor
-        close(fifo_fd);
+        close(fifo_send_fd);
+        printf("[Cli]: Fechei descritor de pid de cliente com pid\n");
 
         //////////////////////////////////////////////////////////////////////////////
         //NOTA:
@@ -111,11 +117,12 @@ int main(int argc, char *argv[]){
 
         /***************************************Resposta recebida pelo cliente**********************************************/
         //Abrimos o descritor de leitura
-        int results;
-        if((results = open(fifo_request, O_RDONLY))<0){
+        int fifo_receive_fd;
+        if((fifo_receive_fd = open(str_pid_client, O_RDONLY)) < 0){
             perror("Erro a abrir o fifo com o pedido do cliente");
             return -1;
         }
+        printf("[Cli]: Abri descritor de fifo para receber resposta\n");
         //Inicializar o buffer para leitura
         int size_buffer = 1024;
         char buffer[size_buffer];
@@ -123,12 +130,15 @@ int main(int argc, char *argv[]){
 
 
         //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
-        while((bytes_read = read(results,buffer,size_buffer)) > 0){
+        while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
             write(1,buffer,bytes_read);
         }
 
-        close(results);
-        unlink(fifo_request);
+        close(fifo_receive_fd);
+        printf("[Cli]: Fechei descritor de fifo para receber resposta\n");
+        //unlink(FIFO_NAME);
+        unlink(str_pid_client);
+        printf("[Cli]: Apaguei fifo\n");
     }
     else {
         perror("Comando desconhecido! Tenta outra vez...");
