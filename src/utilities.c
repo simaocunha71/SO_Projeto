@@ -69,19 +69,23 @@ char* inttoString(int n){
    return string;
 }
 
-char** add_string_to_array(char** array_of_strings, const char* string_to_add){
-    int num_strings_already_existing = 0;
-    while (array_of_strings[num_strings_already_existing] != NULL){        
-        num_strings_already_existing++;
+int get_binaries_num(char* buffer){
+    int r = 0;
+    for(int i = 0; buffer[i] != '\0'; i++)
+        if(buffer[i] == ' ')
+            r++;
+    return r+1;
+}
+
+char** create_binaries_array(char* buff){
+    int buffer_len = strlen(buff);
+    //char* buffer = strdup("ola ole oli olo olu");
+    char* buffer = strdup(buff);
+    int number_of_binaries = get_binaries_num(buffer);
+    char* results[number_of_binaries];
+    for(int i = 0; i < number_of_binaries && buffer != NULL; i++){
+        results[i] = strdup(strsep(&buffer, " "));
+        printf("Results %d-> %s\n",i, results[i]);
     }
-    array_of_strings[num_strings_already_existing] = strdup(string_to_add);
-    strcpy(array_of_strings[num_strings_already_existing], string_to_add);
-    char** aux = realloc(array_of_strings, (num_strings_already_existing+2) * sizeof(char *));
-    if(aux == NULL)
-        perror("Erro a fazer realloc na adição de strings a arrays");
-    else {
-        array_of_strings = aux;
-        array_of_strings[num_strings_already_existing+1] = NULL;
-    }
-    return array_of_strings;
+    return results;
 }

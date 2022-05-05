@@ -44,3 +44,17 @@ char* inttoString(int n);
  * @return char** String atualizada
  */
 char** add_string_to_array(char** array_of_strings, const char* string_to_add);
+
+/**
+ * @brief Conta o número de binários numa string (argumento)
+ * @param buffer String a contar
+ * @return int Número de binários de argumento
+ */
+int get_binaries_num(char* buffer);
+
+/**
+ * @brief Cria um array de strings com o nome dos binários a utilizar
+ * @param buffer Argumento que contem os binários
+ * @return char** Array de strings que contém os binários
+ */
+char** create_binaries_array(char* buffer);
