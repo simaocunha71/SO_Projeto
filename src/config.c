@@ -72,7 +72,6 @@ void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_
         //printf("-> Path: %s\n", c->path_name);
         //printf("-> Input: %s\n", file_to_use);
         //printf("-> Output: %s\n", new_file);
-
         execvp(command_files[0], command_files);
         perror("Erro a executar o binário");
 

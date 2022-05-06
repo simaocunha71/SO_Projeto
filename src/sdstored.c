@@ -25,49 +25,87 @@ void sendServerStatus(){
 
 int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** binaries_array, int number_of_commands){
 
-    redirection(input,0,1);
-    redirection(output,1,1);
+    int input_fd, output_fd;
+    //abre o input pra onde lemos
+    if((input_fd= open(input, O_RDONLY))==-1){
+        perror("input_fd open");
+    }
+
+    //abre o output para onde vamos escrever
+    if((output_fd=open(output, O_WRONLY | O_CREAT | O_TRUNC, 0640))==-1){
+        perror("output_fd open");
+    }
+
+    //printf("%d | %s | %s | %s\n", nc, path, input, output);
+
+    //guardamos o standard output pra debugging
+   // int stdout = dup(1);
+
+    //mudamos o input default pra o nosso ficheiro de input
+    dup2(input_fd, 0);
+    //mudamos o output default pra o nosso ficheiro output
+    dup2(output_fd,1);
+    //fechamos o input e o output pq os execs vao usar o 0 e 1
+    close(input_fd);
+    close(output_fd);
+
+
+    //redirection(input,0,1);
+    //redirection(output,1,1);
+
 
     //criamos os pipes necessarios pra executar todos os comandos
-    int p[number_of_commands-1][2];
     int i,status;
-    number_of_commands--;
+    //number_of_commands--;
 
     //caso so haja um comando
     if(number_of_commands == 1){
         if(fork() == 0){
+            //printf("INICO SINGLE PIPE\n");
             execute_config(c,binaries_array[0],input, output);
             exit(0);
+            //printf("FIM SINGLE PIPE\n");
         }
         wait(NULL);
+        //printf("DONE WAITING SINGLE\n");
     }
     else{
-        for (i = 0; i < number_of_commands; i++){
+        int p[number_of_commands-1][2];
+        for (i = 0; i < number_of_commands; i++){           //CASO DE INICIO
             if (i == 0){
                 pipe(p[i]);
                 if (fork()==0){
+                   // printf("INICO FIRST PIPE\n");
                     close(p[i][0]);
+                   // printf("close\n");
                     dup2(p[i][1],1);
+                   // printf("dup2\n");
                     close(p[i][1]);
+                   // printf("close2\n");
                     execute_config(c,binaries_array[i],input, output);
+                   // printf("has executed\n");
                     _exit(0);
+                   // printf("FIM FIRST PIPE\n");
                 }       
                 else
                     close(p[i][1]);
             }
-            else if (i == number_of_commands - 1){
+            else if (i == number_of_commands - 1){          //ULTIMO
                 if (fork()==0){
+                   // printf("INICO LAST PIPE\n");
                     dup2(p[i-1][0],0);
                     close(p[i-1][0]);
                     execute_config(c,binaries_array[i],input, output);
                     _exit(0);
+                   // printf("FIM LAST PIPE\n");
                 }
                 else 
                     close(p[i-1][0]);
             }
-            else {
+            else {                                              //MEIO
                 pipe(p[i]);
                 if (fork() == 0){
+                   // printf("INICO MIDDLE PIPE\n");
                     close(p[i][0]);
                     dup2(p[i][1],1);
                     close(p[i][1]);
@@ -75,6 +113,7 @@ int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** bin
                     close(p[i-1][0]);
                     execute_config(c,binaries_array[i],input, output);
                     _exit(0);
+                   // printf("LAST MIDDLE PIPE\n");
                 }
                 else {
                     close(p[i][1]);
@@ -192,12 +231,15 @@ int main(int argc, char const *argv[]){
             char* inputfile = strdup(strsep(&buffer_copy, " "));
             char* outputfile= strdup(strsep(&buffer_copy, " "));
 
-            int number_of_commands;
+            int number_of_commands = get_binaries_num(buffer_copy);
 
             //Parse dos binários a executar
+            binaries_to_execute = create_binaries_array(buffer_copy);
+            /*
             for(number_of_commands = 0;buffer_copy != NULL; number_of_commands++){
                 binaries_to_execute = add_string_to_array(binaries_to_execute, strdup(strsep(&buffer_copy, " "))); //está a crashar aqui
             }
+            */
 
             //for (int i = 0; i < number_of_commands; i++){
             //    printf("||%s\n",binaries_to_execute[i]);

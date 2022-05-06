@@ -78,11 +78,9 @@ int get_binaries_num(char* buffer){
 }
 
 char** create_binaries_array(char* buff){
-    int buffer_len = strlen(buff);
-    //char* buffer = strdup("ola ole oli olo olu");
     char* buffer = strdup(buff);
     int number_of_binaries = get_binaries_num(buffer);
-    char* results[number_of_binaries];
+    char** results = malloc(number_of_binaries * sizeof(char*));
     for(int i = 0; i < number_of_binaries && buffer != NULL; i++){
         results[i] = strdup(strsep(&buffer, " "));
         printf("Results %d-> %s\n",i, results[i]);
