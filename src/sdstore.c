@@ -45,16 +45,16 @@ int main(int argc, char *argv[]){
 
         //String aonde vai ter toda a informação enviada para o servidor: capacidade para o pid + tamanho das strings que compoe a informação
         //Formato desta string com, por exemplo, 2 binários a executar: "PID_Cliente File_Input File_Output Binario1 Binario2"
-        char* info_toSend = malloc(sizeof(char) * (sizeof(int) + strlen(argv[1]) + size_of_args + 1));
-        strcat(info_toSend, str_pid_client);
-        strcat(info_toSend, " "); 
-        strcat(info_toSend, "P ");//flag para proc-file
+        char* info_toSend = malloc(sizeof(char)); 
+        my_strcat(info_toSend, str_pid_client);
+        my_strcat(info_toSend, " "); 
+        my_strcat(info_toSend, "P ");//flag para proc-file
 
         //Parse dos nomes dos argumentos
         for(int i = 2; i < argc; i++){
-            strcat(info_toSend, argv[i]);
-            if(i < argc - 1)
-                strcat(info_toSend, " ");
+            my_strcat(info_toSend, argv[i]);
+            if(i != argc - 1)
+                my_strcat(info_toSend, " ");
         }
 
         //criamos o pipe com o pid do cliente
@@ -62,6 +62,7 @@ int main(int argc, char *argv[]){
             perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
 
         printf("[Cli]: Criei fifo com pid\n");
+
 
         //vamos abrir o pipe cliente->servidor
         int fifo_send_fd;
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]){
         printf("[Cli]: Abri descritor de pid de cliente com pid\n");
 
         //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_send_fd,info_toSend,strlen(info_toSend));
+        write(fifo_send_fd,info_toSend,strlen(info_toSend) + 1); //strlen(x) + 1 por causa do '\0'
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);

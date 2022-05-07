@@ -81,9 +81,17 @@ char** create_binaries_array(char* buff){
     char* buffer = strdup(buff);
     int number_of_binaries = get_binaries_num(buffer);
     char** results = malloc(number_of_binaries * sizeof(char*));
-    for(int i = 0; i < number_of_binaries && buffer != NULL; i++){
+    int i;
+    for(i = 0; i < number_of_binaries - 1 && buffer != NULL; i++){
         results[i] = strdup(strsep(&buffer, " "));
-        printf("Results %d-> %s\n",i, results[i]);
+        //printf("Results %d-> %s\n",i, results[i]);
     }
+    results[i] = strdup(strsep(&buffer, "\0"));
+    //printf("Results %d-> %s\n",i, results[i]);
     return results;
+}
+
+void my_strcat(char* a, char* b){
+    a = realloc(a, (strlen(a)+strlen(b))+1);
+    strcat(a,b);
 }

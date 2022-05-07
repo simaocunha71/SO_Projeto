@@ -58,3 +58,10 @@ int get_binaries_num(char* buffer);
  * @return char** Array de strings que contém os binários
  */
 char** create_binaries_array(char* buffer);
+
+/**
+ * @brief Realoca memoria da string a de forma a conter a + b
+ * @param a String a
+ * @param b String b
+ */
+void my_strcat(char* a, char* b);
