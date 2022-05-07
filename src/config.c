@@ -58,7 +58,7 @@ char* get_binary_filename (char* binary_name, char* binary_folder){
     return res;
 }
 
-void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_file){
+void execute_config (CONFIG cs, char* binary_name){
     CONFIG c = get_Config(binary_name,cs);
 
     //printf("GET:\n");
@@ -66,13 +66,14 @@ void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_
     //printf("> Num: %d\n", c->max_instances);
     //printf("> Path: %s\n", c->path_name);
     if (c != NULL){
-        redirection(file_to_use,0, 0);
-        redirection(new_file,1, 1);
-        char* command_files[] = {c->path_name, file_to_use, new_file, NULL}; 
+        //redirection(file_to_use,0, 0);
+        //redirection(new_file,1, 1);
+        //char* command_files[] = {c->path_name, file_to_use, new_file, NULL}; 
         //printf("-> Path: %s\n", c->path_name);
         //printf("-> Input: %s\n", file_to_use);
         //printf("-> Output: %s\n", new_file);
-        execvp(command_files[0], command_files);
+        //execvp(command_files[0], command_files);
+        execl(c->path_name,c->binary_name, NULL);
         perror("Erro a executar o binário");
 
     }

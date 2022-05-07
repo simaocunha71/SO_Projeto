@@ -28,13 +28,11 @@ CONFIG create_config (char* line, char* binarys_folder, CONFIG c);
 CONFIG load_configurations (char* config_filename, char* binarys_folder);
 
 /**
- * @brief Função que recebe o binário a executar e executa-o num ficheiro de input, guardando o resultado num outro ficheiro
+ * @brief Função que recebe o binário a executar e executa-o
  * @param cs Lista ligada dos binários a executar
  * @param binary_name Nome do binário a executar
- * @param file_to_use Ficheiro a usar com o binário
- * @param new_file Nome do novo ficheiro
  */
-void execute_config (CONFIG cs, char* binary_name, char* file_to_use, char* new_file);
+void execute_config (CONFIG cs, char* binary_name);
 
 /**
  * @brief Devolve o path para o respetivo binário
