@@ -92,7 +92,7 @@ int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** bin
                    // printf("INICO LAST PIPE\n");
                     dup2(p[i-1][0],0);
                     close(p[i-1][0]);
-                    execute_config(c,binaries_array[0]);
+                    execute_config(c,binaries_array[i]);
                     _exit(0);
                    // printf("FIM LAST PIPE\n");
                 }
@@ -108,7 +108,7 @@ int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** bin
                     close(p[i][1]);
                     dup2(p[i-1][0],0);
                     close(p[i-1][0]);
-                    execute_config(c,binaries_array[0]);
+                    execute_config(c,binaries_array[i]);
                     _exit(0);
                    // printf("LAST MIDDLE PIPE\n");
                 }
