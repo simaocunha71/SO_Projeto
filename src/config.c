@@ -60,19 +60,9 @@ char* get_binary_filename (char* binary_name, char* binary_folder){
 
 void execute_config (CONFIG cs, char* binary_name){
     CONFIG c = get_Config(binary_name,cs);
-
-    //printf("GET:\n");
-    //printf("> Nome: %s\n", c->binary_name);
-    //printf("> Num: %d\n", c->max_instances);
-    //printf("> Path: %s\n", c->path_name);
+    
     if (c != NULL){
-        //redirection(file_to_use,0, 0);
-        //redirection(new_file,1, 1);
-        //char* command_files[] = {c->path_name, file_to_use, new_file, NULL}; 
-        //printf("-> Path: %s\n", c->path_name);
-        //printf("-> Input: %s\n", file_to_use);
-        //printf("-> Output: %s\n", new_file);
-        //execvp(command_files[0], command_files);
+        changeInstances(cs,binary_name,"dec");
         execl(c->path_name,c->binary_name, NULL);
         perror("Erro a executar o binário");
 
@@ -94,4 +84,37 @@ CONFIG get_Config(char* binary_name, CONFIG cs){
         cs = cs->next;
     }
     return c;
+}
+
+void changeInstances(CONFIG c, char* binary, char* operation){
+    if(strcmp(operation, "inc") == 0){
+        while(c != NULL){
+            if(strcmp(c->binary_name, binary) == 0)
+                c->max_instances++;
+            c = c->next;
+        }
+    }
+    if(strcmp(operation, "dec") == 0){
+        while(c != NULL){
+            if(strcmp(c->binary_name, binary) == 0)
+                c->max_instances--;
+            c = c->next;
+        }
+    }    
+
+}
+
+int canExecuteBinaries(CONFIG c, char** binaries_array){
+    int boolean = 1;
+    int flag = 0;
+    for(int i = 0; binaries_array != NULL && flag == 1; i++){
+        if(match_binary_with_instances(c, binaries_array[i]) == 0)
+            flag = 0;
+    }
+    return boolean;
+}
+
+int match_binary_with_instances(CONFIG cs, char* binary_name){
+    CONFIG c = get_Config(cs,binary_name);
+    return c->max_instances >= 0;
 }

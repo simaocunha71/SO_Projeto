@@ -50,4 +50,18 @@ char* get_binary_filename (char* binary_name, char* binary_folder);
  */
 CONFIG get_Config(char* binary_name, CONFIG cs);
 
-char* mystrcat(char* a, char* b);
+/**
+ * @brief Incrementa ou decrementa o nº de instancias de um binario, consoante queremos libertá-lo ou decrementá-lo
+ * @param c Configuração de binários
+ * @param binary Nome do binário
+ * @param operation "dec" se queremos decrementar; "inc" se queremos incrementar
+ */
+void changeInstances(CONFIG c, char* binary, char* operation);
+
+/**
+ * @brief Dado um array de binários e a lista ligada de configurações, verifica se pode executar todos os binários do array
+ * @param c Lista ligada de binários
+ * @param binaries_array Array de binários a executar
+ * @return int 1 se sucesso, 0 caso contrário
+ */
+int canExecuteBinaries(CONFIG c, char** binaries_array);
