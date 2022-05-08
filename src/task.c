@@ -80,6 +80,7 @@ void printQueue (Queue q){
 
 }
 
+/*
 int main(){
     Queue q = init_queue();
     char* arrayB[] = {"binario1", "binario2", "binario3"};
@@ -90,3 +91,4 @@ int main(){
     printf("REM\n");
     printQueue(q);
 }
+*/

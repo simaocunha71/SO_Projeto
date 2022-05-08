@@ -141,21 +141,21 @@ int main(int argc, char const *argv[]){
     if((mkfifo(FIFO_NAME, 0666)) < 0){
         perror("Erro a criar o fifo do servidor");
     }
-    printf("[SV]: Criei FIFO\n");
+    //printf("[SV]: Criei FIFO\n");
     int fifo_fd, fifo_fd_write;
 
     
     if((fifo_fd = open(FIFO_NAME, O_RDONLY)) < 0){
         perror("Erro a abrir o descritor de comunicação com clientes");
     }
-    printf("[SV]: Abri descritor de comunicação com clientes\n");
+    //printf("[SV]: Abri descritor de comunicação com clientes\n");
 
 
     //para o server estar sempre a funcionar, temos este descritor SEMPRE aberto (nunca o vamos usar)
     if((fifo_fd_write = open(FIFO_NAME, O_WRONLY)) < 0){
         perror("Erro a abrir o descritor de sobrevivência do servidor");
     }
-    printf("[SV]: Abri descritor de sobrevivencia\n");
+   // printf("[SV]: Abri descritor de sobrevivencia\n");
 
     //Array dinâmico com todos os binarios a executar
     char** binaries_to_execute = NULL;
@@ -173,17 +173,19 @@ int main(int argc, char const *argv[]){
         char* client_pid = strdup(strsep(&buffer_copy, " "));
         char* operation_mode = strdup(strsep(&buffer_copy, " "));
 
-        write(1, buffer_from_fifo, strlen(buffer_from_fifo));
-        printf("[SV]: Enviei mensagem para cliente com pid\n");
+        //write(1, buffer_from_fifo, strlen(buffer_from_fifo));
+       // printf("[SV]: Enviei mensagem para cliente com pid\n");
 
         int client_write;
         if((client_write = open(client_pid, O_WRONLY)) < 0){
             perror("Erro a abrir o descritor do fifo do cliente");
         }
-        printf("[SV]: Abri descritor de cliente com pid\n");
+       // printf("[SV]: Abri descritor de cliente com pid\n");
 
+        /*
         char* pending_message = "pending...\n";
         write(client_write, pending_message, strlen(pending_message));
+        */
 
         ////////////////////TODO//////////////////////////////////
         //fazer aqui o código que verifica se podemos executar o pedido do cliente ou se metemos esse pedido numa queue
@@ -191,7 +193,7 @@ int main(int argc, char const *argv[]){
         //mystrcat(pipo, clientpid);
         //////////////////////////////////////////////////////////
 
-        
+        //if (fork() == 0) {                    //HERE!!! -> Solucao encontrado para os pedidos concorrentes
         //Execução do comando "status"
         if(strcmp(operation_mode, "S") == 0){
             char* executing_message = "STATUS executing...\n";
@@ -226,24 +228,40 @@ int main(int argc, char const *argv[]){
             //Parse dos binários a executar
             binaries_to_execute = create_binaries_array(buffer_copy, number_of_commands);
 
-            
+            /*
             //Escrever ao cliente que vamos executar o pedido dele
             char* executing_message = "executing...\n";
             write(client_write, executing_message, strlen(executing_message));
-
+            */
             
             ////////////O bloco abaixo so vai ser executado se a tasklist estiver vazia?? (TODO)////////////
 
             //Pipeline dos comandos a executar
-            if(canExecuteBinaries(c, binaries_to_execute) == 1){
+            if(canExecuteBinaries(c, binaries_to_execute,number_of_commands) == 1){
                 if(fork() == 0){
+
+                    //Escrever ao cliente que vamos executar o pedido dele
+                    char* executing_message = "executing...\n";
+                    write(client_write, executing_message, strlen(executing_message));
+
+                    request_enter(c,binaries_to_execute,number_of_commands);
+                    
+                    CONFIG aux = get_Config("nop",c);
+
+                    printf("%d",aux->max_instances);
+                    
+                    sleep(10);
                     if(execute_commands_in_pipeline(c,inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
                         perror("Erro a efetuar a execução da pipeline dos binários");
                     }
-
+                    
+                    request_out(c,binaries_to_execute,number_of_commands);
+                    
                     close(client_write);
                     close(fifo_fd_write);
-                    printf("[SV]: Fechei descritor de comunicação com clientes\n");
+
+
+                   // printf("[SV]: Fechei descritor de comunicação com clientes\n");
 
                     close(fifo_fd);
                     exit(0);
@@ -257,16 +275,75 @@ int main(int argc, char const *argv[]){
                 write(client_write, outputfile, strlen(outputfile));
             }
             else{
+                char* message = "pending...\n";
+                write(client_write, message, strlen(message));
+
                 add_task(q, inputfile, outputfile, binaries_to_execute, number_of_commands);
+
+                printQueue(q);
+
+                message = "pending...\n";
+                write(client_write, message, strlen(message));
             }
             ////////////////////////////////////////////////////////////////////////////////////////////////
         }
 
+        ///////////////////////     TRATAMENTO DA QUEUE ////////////////////////////////////////
+
+        //Enquanto a queue existir executar
+        while (!isEmpty(q))
+        {
+            if(canExecuteBinaries(c, q->inicio->binaries_to_execute,q->inicio->binaries_num) == 1) {  //se for possivel executar a que esta no inicio
+                if(fork() == 0){
+
+                    //Escrever ao cliente que vamos executar o pedido dele
+                    char* executing_message = "executing...\n";
+                    write(client_write, executing_message, strlen(executing_message));
+                    
+                    request_enter(c,binaries_to_execute,q->inicio->binaries_num);
+                    
+                    printQueue(q);
+                    
+                    sleep(10);
+                    if(execute_commands_in_pipeline(c,q->inicio->file_input,q->inicio->file_output,binaries_to_execute,q->inicio->binaries_num) != 0){ 
+                        perror("Erro a efetuar a execução da pipeline dos binários");
+                    }
+                    
+                    request_out(c,binaries_to_execute,q->inicio->binaries_num);
+
+                    close(client_write);
+                    close(fifo_fd_write);
+
+                    printQueue(q);
+
+                   // printf("[SV]: Fechei descritor de comunicação com clientes\n");
+
+                    close(fifo_fd);
+                    exit(0);
+                }
+                wait(NULL);
+
+                //escrevemos no cliente no cliente que concluímos o pedido deles
+                char* success_message = "done!\n";
+                write(client_write, success_message, strlen(success_message));
+
+                write(client_write, q->inicio->file_output, strlen(q->inicio->file_output));
+
+                remove_task(q);
+            }
+            
+        }
+        
+
         
         //fechamos o pipe para aonde enviamos a informação ao cliente
         close(client_write);
-        printf("[SV]: Fechei descritor de cliente com pid\n");
+        //printf("[SV]: Fechei descritor de cliente com pid\n");
     }
+    //close(client_write);      //concorrencia
+ //}                            //^^^^^
+
+ 
     
     //printf("Código de erro: %d\n",errno); //???
 

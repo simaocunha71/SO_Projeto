@@ -104,25 +104,72 @@ void changeInstances(CONFIG c, char* binary, char* operation){
 
 }
 
-int canExecuteBinaries(CONFIG c, char** binaries_array){
-    int boolean = 1;
-    int flag = 0;
-    for(int i = 0; binaries_array != NULL && flag == 1; i++){
-        if(match_binary_with_instances(c, binaries_array[i]) == 0)
+int canExecuteBinaries(CONFIG c, char** binaries_array, int number_of_commands){
+    int flag = 1;
+    for(int i = 0; (i < number_of_commands) && (flag == 1); i++){
+        if(match_binary_with_instances(c, binaries_array[i]) == 0){
             flag = 0;
+        }    
     }
-    return boolean;
+    return flag;
 }
 
 int match_binary_with_instances(CONFIG cs, char* binary_name){
     CONFIG c = get_Config(binary_name,cs);
-    return c->max_instances >= 0;
+    return c->max_instances > 0;
 }
 
-//void request_enter(CONFIG cs)
+void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries){
+    int i;
+    for(i = 0; i < number_of_binaries; i++) {
+        changeInstances(cs,binaries_array[i],"dec");
+    }
+}
+
+void request_out(CONFIG cs, char** binaries_array, int number_of_binaries){
+    int i;
+    for(i = 0; i < number_of_binaries; i++) {
+        changeInstances(cs,binaries_array[i],"inc");
+    }
+}
+
+void print_num(CONFIG c){
+    while (c != NULL)
+    {
+        printf("%s : %d\n", c->binary_name, c->max_instances);
+        c = c->next;
+    }
+}
 
 /*
 int main(){
     CONFIG c = load_configurations("../bin/sdstore.conf","../obj/");
+    
+    printf("Instancias antes:\n");
+
+    print_num(c);
+
+    char* args = "nop nop bcompress nop bdecompress";
+    int num = get_binaries_num(args);
+    char** bin = NULL;
+    bin = create_binaries_array(args,num);
+
+    request_enter(c,bin,num);
+
+    printf("Instancias depois de entrar:\n");
+
+    print_num(c);
+
+    printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
+
+    request_out(c,bin,num);
+
+    printf("Instancias depois de sair:\n");
+
+    print_num(c);
+
+    printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
+
+    return 0;
 }
 */

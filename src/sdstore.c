@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
         if(mkfifo(str_pid_client, 0666) < 0)
             perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
 
-        printf("[Cli]: Criei fifo com pid\n");
+        //printf("[Cli]: Criei fifo com pid\n");
 
 
         //vamos abrir o pipe cliente->servidor
@@ -71,14 +71,14 @@ int main(int argc, char *argv[]){
             return -1;
         }
 
-        printf("[Cli]: Abri descritor de pid de cliente com pid\n");
+       // printf("[Cli]: Abri descritor de pid de cliente com pid\n");
 
         //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
         write(fifo_send_fd,info_toSend,strlen(info_toSend) + 1); //strlen(x) + 1 por causa do '\0'
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);
-        printf("[Cli]: Fechei descritor de pid de cliente com pid\n");
+       // printf("[Cli]: Fechei descritor de pid de cliente com pid\n");
 
         //////////////////////////////////////////////////////////////////////////////
         //NOTA:
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
             perror("Erro a abrir o fifo com o pedido do cliente");
             return -1;
         }
-        printf("[Cli]: Abri descritor de fifo para receber resposta\n");
+       // printf("[Cli]: Abri descritor de fifo para receber resposta\n");
         //Inicializar o buffer para leitura
         int size_buffer = 1024;
         char buffer[size_buffer];
@@ -105,10 +105,10 @@ int main(int argc, char *argv[]){
         }
 
         close(fifo_receive_fd);
-        printf("[Cli]: Fechei descritor de fifo para receber resposta\n");
+        //printf("[Cli]: Fechei descritor de fifo para receber resposta\n");
         //unlink(FIFO_NAME);
         unlink(str_pid_client);
-        printf("[Cli]: Apaguei fifo\n");
+       // printf("[Cli]: Apaguei fifo\n");
     }
     else {
         perror("Comando desconhecido! Tenta outra vez...");

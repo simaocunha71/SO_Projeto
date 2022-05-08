@@ -64,6 +64,16 @@ void changeInstances(CONFIG c, char* binary, char* operation);
  * @param binaries_array Array de binários a executar
  * @return int 1 se sucesso, 0 caso contrário
  */
-int canExecuteBinaries(CONFIG c, char** binaries_array);
+int canExecuteBinaries(CONFIG c, char** binaries_array,int number_of_commands);
 
 int match_binary_with_instances(CONFIG cs, char* binary_name);
+
+/**
+ * @brief Altera o numero das instancias (decrementa) de cada binario quando um pedido que os use começa a ser efetuado
+ */
+void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries);
+
+/**
+ * @brief Altera o numero das instancias (incrementa) de cada binario quando um pedido que os use acaba de ser efetuado
+ */
+void request_out(CONFIG cs, char** binaries_array, int number_of_binaries);
