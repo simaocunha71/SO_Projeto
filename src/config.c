@@ -115,6 +115,14 @@ int canExecuteBinaries(CONFIG c, char** binaries_array){
 }
 
 int match_binary_with_instances(CONFIG cs, char* binary_name){
-    CONFIG c = get_Config(cs,binary_name);
+    CONFIG c = get_Config(binary_name,cs);
     return c->max_instances >= 0;
 }
+
+//void request_enter(CONFIG cs)
+
+/*
+int main(){
+    CONFIG c = load_configurations("../bin/sdstore.conf","../obj/");
+}
+*/

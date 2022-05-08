@@ -7,7 +7,7 @@
 #include <errno.h>
 
 #include "../config.c"
-#include "task.h"
+#include "../task.c"
 
 #define BUFFERSIZE 1024
 

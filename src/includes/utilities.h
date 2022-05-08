@@ -55,9 +55,10 @@ int get_binaries_num(char* buffer);
 /**
  * @brief Cria um array de strings com o nome dos binários a utilizar
  * @param buffer Argumento que contem os binários
+ * @param number_of_binaries Numero de binarios a criar
  * @return char** Array de strings que contém os binários
  */
-char** create_binaries_array(char* buffer);
+char** create_binaries_array(char* buff, int number_of_binaries);
 
 /**
  * @brief Realoca memoria da string a de forma a conter a + b

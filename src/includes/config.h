@@ -65,3 +65,5 @@ void changeInstances(CONFIG c, char* binary, char* operation);
  * @return int 1 se sucesso, 0 caso contrário
  */
 int canExecuteBinaries(CONFIG c, char** binaries_array);
+
+int match_binary_with_instances(CONFIG cs, char* binary_name);

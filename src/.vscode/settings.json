@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "fcntl.h": "c",
-        "sdstored.c": "cpp"
-    },
-    "C_Cpp.errorSquiggles": "Disabled"
-}

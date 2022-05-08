@@ -94,4 +94,3 @@ void my_strcat(char* a, char* b){
     a = realloc(a, (strlen(a)+strlen(b))+1);
     strcat(a,b);
 }
-
