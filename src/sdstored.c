@@ -204,6 +204,7 @@ int main(int argc, char const *argv[]){
                             char* executing_message = "executing...\n";
                             write(client_write, executing_message, strlen(executing_message));
                             request_enter(c,binaries_to_execute,number_of_commands);
+                            //print_num(c);       // print das instancias (debug)
                             sleep(5);
                             if(execute_commands_in_pipeline(c,inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
                                 perror("Erro a efetuar a execução da pipeline dos binários");
@@ -221,6 +222,8 @@ int main(int argc, char const *argv[]){
                         write(client_write, success_message, strlen(success_message));
 
                         write(client_write, outputfile, strlen(outputfile));
+
+                         //print_num(c);             // print das instancias (debug)
                     }
                     else{
                         char* message = "pending...\n";
@@ -232,11 +235,12 @@ int main(int argc, char const *argv[]){
                 }
                 else{
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
-                        remove_task(q);
+                        //remove_task(q);
                         if(fork() == 0){
                             //Escrever ao cliente que vamos executar o pedido dele
                             char* executing_message = "executing...\n";
                             write(client_write, executing_message, strlen(executing_message));
+                            print_num(c);
                             request_enter(c,binaries_to_execute,number_of_commands);
                             sleep(5);
                             if(execute_commands_in_pipeline(c,q->inicio->file_input,
@@ -245,12 +249,13 @@ int main(int argc, char const *argv[]){
                                                               q->inicio->binaries_num) != 0){ 
                                 perror("Erro a efetuar a execução da pipeline dos binários");
                             }
-                            request_out(c,binaries_to_execute,number_of_commands);                     
+                            request_out(c,binaries_to_execute,number_of_commands);                  
                             close(client_write);
                             close(fifo_fd_write);
                             close(fifo_fd);
                             exit(0);
                         }
+                        remove_task(q);    //acho que e aqui, nao la em cima
                         wait(NULL);
 
                         //escrevemos no cliente no cliente que concluímos o pedido deles
@@ -258,6 +263,8 @@ int main(int argc, char const *argv[]){
                         write(client_write, success_message, strlen(success_message));
 
                         write(client_write, outputfile, strlen(outputfile));
+
+                        //print_num(c);             // print das instancias (debug)
                     }
 
                 }

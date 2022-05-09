@@ -124,6 +124,7 @@ void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries){
     for(i = 0; i < number_of_binaries; i++) {
         changeInstances(cs,binaries_array[i],"dec");
     }
+    
 }
 
 void request_out(CONFIG cs, char** binaries_array, int number_of_binaries){
@@ -136,7 +137,7 @@ void request_out(CONFIG cs, char** binaries_array, int number_of_binaries){
 void print_num(CONFIG c){
     while (c != NULL)
     {
-        printf("%s : %d\n", c->binary_name, c->max_instances);
+        printf("%s -> %d\n", c->binary_name, c->max_instances);
         c = c->next;
     }
 }
@@ -144,10 +145,15 @@ void print_num(CONFIG c){
 /*
 int main(){
     CONFIG c = load_configurations("../bin/sdstore.conf","../obj/");
+
+     Queue q = init_queue();
+
     
     printf("Instancias antes:\n");
 
     print_num(c);
+
+    printf("\n");
 
     char* args = "nop nop bcompress nop bdecompress";
     int num = get_binaries_num(args);
@@ -160,7 +166,19 @@ int main(){
 
     print_num(c);
 
+    printf("\n");
+
     printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
+
+    printf("\n");
+
+    if (canExecuteBinaries(c, bin, num) == 0){
+        add_task(q,"Input debug","Output Debug",bin,num);
+    }
+
+    //printQueue(q);
+
+    printf("\n");
 
     request_out(c,bin,num);
 
@@ -168,7 +186,21 @@ int main(){
 
     print_num(c);
 
+    printf("\n");
+
     printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
+
+    printf("\n");
+
+    if (canExecuteBinaries(c,bin,num) == 1)
+    {
+        remove_task(q);
+    }
+
+    //printQueue(q);
+
+    printf("\n");
+    
 
     return 0;
 }

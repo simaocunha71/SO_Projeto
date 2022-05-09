@@ -1,4 +1,5 @@
 #include "../utilities.c"
+#include "../task.c"
 
 /**
  * @brief Lista ligada que constitui um binário e o número máximo de instâncias que podem ocorrer (a usar os valores do enunciado)
@@ -77,3 +78,5 @@ void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries);
  * @brief Altera o numero das instancias (incrementa) de cada binario quando um pedido que os use acaba de ser efetuado
  */
 void request_out(CONFIG cs, char** binaries_array, int number_of_binaries);
+
+void print_num(CONFIG c);
