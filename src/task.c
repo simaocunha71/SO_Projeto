@@ -6,6 +6,7 @@ Queue init_queue(){
     Queue q = malloc(sizeof(struct queue));
     q->inicio = NULL;
     q->fim = NULL;
+    printQueue(q);
     return q;
 }
 int isEmpty (Queue q){
@@ -32,6 +33,7 @@ void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_
             q->fim = q->fim->prox;
         }
     }
+    printQueue(q);
 }
 
 
@@ -44,6 +46,7 @@ void remove_task (Queue q){
         free(temp->file_output);
         freeArrayList(temp->binaries_to_execute, temp->binaries_num); 
     }
+    printQueue(q);
 }
 
 void freeArrayList(char** arrayStrings, int size){
@@ -79,16 +82,18 @@ void printQueue (Queue q){
 
 
 }
-
 /*
 int main(){
     Queue q = init_queue();
     char* arrayB[] = {"binario1", "binario2", "binario3"};
+    printf("Add1\n");
     add_task(q,"input", "output", arrayB,3);
+    printf("Add2\n");
     add_task(q,"input2", "output2", arrayB,3);
-    printQueue(q);
+    //printQueue(q);
+    printf("rem1\n");
     remove_task(q);
-    printf("REM\n");
-    printQueue(q);
+    //printf("REM\n");
+    //printQueue(q);
 }
 */
