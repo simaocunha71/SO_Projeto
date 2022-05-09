@@ -142,6 +142,48 @@ void print_num(CONFIG c){
     }
 }
 
+int size_array(CONFIG c){
+    int r = 0;
+    while(c != NULL){
+        r++;
+        c=c->next;
+    }
+    return r;
+}
+
+int* create_array_copy_of_instances(CONFIG c){
+    int size = size_array(c);
+    int* v = malloc(sizeof(int) * size);
+    for(int i = 0; c != NULL && i < size; i++){
+        v[i] = c->max_instances;
+        c=c->next;
+    }
+    return v;
+}
+
+int get_original_inst(int indice, int vetor_instances_original[]){
+    return vetor_instances_original[indice];
+}
+
+char* get_status_from_config(CONFIG c, int vetor_instances_original[]){
+    char* r = malloc(sizeof(char));
+    int indice = 0;
+    while(c != NULL){
+        my_strcat(r,"transf ");
+        my_strcat(r,c->binary_name);
+        my_strcat(r,": ");
+        my_strcat(r,inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))); //instancias a decorrer
+        my_strcat(r,"/");
+        my_strcat(r,inttoString(c->max_instances));
+        my_strcat(r," (running/max)\n");
+        //printf("R:: %s\n", r); CORRIGIR ISTO
+        indice++;
+        c=c->next;
+    }
+    
+    return r;
+}
+
 /*
 int main(){
     CONFIG c = load_configurations("../bin/sdstore.conf","../obj/");

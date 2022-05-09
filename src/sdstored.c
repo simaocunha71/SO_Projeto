@@ -121,6 +121,20 @@ int sendtoclient(int nr){
 
 }
 
+char* create_status_message(CONFIG c, Queue q, int vetor_instances_original[]){
+    char* status_config = get_status_from_config(c,vetor_instances_original);
+    printf("SC: %s\n", status_config);
+    char* status_queue = get_status_from_queue(q);
+    printf("SQ: %s\n", status_queue);
+    char* r = malloc(sizeof(char));
+    my_strcat(r,status_queue);
+    my_strcat(r,status_config);
+    free(status_queue);
+    free(status_config);
+    return r;
+}
+
+
 //Apagar fifos pela bash: find . -type p -delete
 //./sdstored bin/sdstore.conf obj/
 int main(int argc, char const *argv[]){
@@ -132,13 +146,15 @@ int main(int argc, char const *argv[]){
 
     Queue q = init_queue();
 
+    int* vector_originalInstances = create_array_copy_of_instances(c);
+
+
     //abre o pipe com nome pra estabelecer a ligaçao do server
     if((mkfifo(FIFO_NAME, 0666)) < 0){
         perror("Erro a criar o fifo do servidor");
     }
     int fifo_fd, fifo_fd_write;
 
-    
     if((fifo_fd = open(FIFO_NAME, O_RDONLY)) < 0){
         perror("Erro a abrir o descritor de comunicação com clientes");
     }
@@ -177,18 +193,18 @@ int main(int argc, char const *argv[]){
         if (fork() == 0) {                    //HERE!!! -> Solucao encontrado para os pedidos concorrentes
             //Execução do comando "status"
             if(strcmp(operation_mode, "S") == 0){
-                char* executing_message = "STATUS executing...\n";
-                write(client_write, executing_message, strlen(executing_message));
-
-                /*
-
-                    Inserir o algoritmo para o comando status
-
-                */
-
-                char* success_message = "STATUS done!\n";
-                write(client_write, success_message, strlen(success_message));
-                close(fifo_fd);
+                //char* executing_message = "STATUS executing...\n";
+                //write(client_write, executing_message, strlen(executing_message));
+                if(fork() == 0){
+                    char* status_message = create_status_message(c,q, vector_originalInstances);
+                    printf("%s\n", status_message);
+                    write(client_write, status_message, strlen(status_message));
+                    
+                    close(client_write);
+                    close(fifo_fd_write);
+                    close(fifo_fd);
+                    exit(0);
+                }
             }
 
             //Execução do comando "proc-file"
@@ -271,10 +287,8 @@ int main(int argc, char const *argv[]){
             }
             _exit(1);
             
-        }//else
-         //   wait(NULL);
-         close(client_write);
-        //close(client_write);
+        }
+        close(client_write);
     }
     
     //close(client_write);      //concorrencia

@@ -4,33 +4,72 @@
 
 // Cliente
 
-int execute_status(char* str_status){
-    int fifo_status = open(FIFO_NAME, O_WRONLY);
-    printf("[Cli]: Abri descritor de fifo\n");
-    if(fifo_status < 0){
-        perror("Erro a abrir o descritor do pipe para o comando \"status\"");
-        return -1;
-    }
-    write(fifo_status,str_status,strlen(str_status));
-    close(fifo_status);
-    printf("[Cli]: Fechei descritor de fifo\n");
-    return 0;
-}
-
 //$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
 int main(int argc, char *argv[]){
 
-    if (argc < 2 && strcmp(argv[1], "status") != 0) {
+    if (argc < 2 && strcmp(argv[1], "status") == 0) {
         perror ("Nº de argumentos inválido! Tenta outra vez...");
     }
     
-    if (argc < 5 && strcmp(argv[1], "proc-file") != 0) {
+    if (argc < 5 && strcmp(argv[1], "proc-file") == 0) {
         perror ("Nº de argumentos inválido! Tenta outra vez...");
     }
 
     
     if(strcmp(argv[1], "status") == 0){
-        return execute_status(argv[1]); //TODO
+        /***************************************Envio do pedido do cliente**************************************************/
+        //pid do cliente para usar como nome do pipe de comunicacao do cliente->servidor
+        int pid_client = getpid();
+        char* str_pid_client = inttoString(pid_client);
+
+        char* info_toSend = malloc(sizeof(char)); 
+        my_strcat(info_toSend, str_pid_client);
+        my_strcat(info_toSend, " "); 
+        my_strcat(info_toSend, "S");
+
+
+        //criamos o pipe com o pid do cliente
+        if(mkfifo(str_pid_client, 0666) < 0)
+            perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
+
+        //vamos abrir o pipe cliente->servidor
+        int fifo_send_fd;
+        if((fifo_send_fd = open(FIFO_NAME, O_WRONLY)) < 0){
+            perror("Erro a criar o descritor para o pipe do comando \"status\" (resposta do servidor)");
+            return -1;
+        }
+
+
+        //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
+        write(fifo_send_fd,info_toSend,strlen(info_toSend) + 1); //strlen(x) + 1 por causa do '\0'
+
+        //fechamos o pipe cliente->servidor
+        close(fifo_send_fd);
+
+        /***************************************Resposta recebida pelo cliente**********************************************/
+        
+        //Abrimos o descritor de leitura
+        int fifo_receive_fd;
+        if((fifo_receive_fd = open(str_pid_client, O_RDONLY)) < 0){
+            perror("Erro a abrir o fifo com o pedido do cliente");
+            return -1;
+        }
+        
+        //Inicializar o buffer para leitura
+        int size_buffer = 1024;
+        char buffer[size_buffer];
+        ssize_t bytes_read;
+
+        printf("AQUIFRFd\n");
+        //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
+        while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
+            printf("\"%s\"\n", buffer);
+            write(1,buffer,bytes_read);
+        }
+        printf("AQUIFRFd\n");
+
+        close(fifo_receive_fd);
+        //unlink(str_pid_client);
     }
     else if(strcmp(argv[1], "proc-file") == 0){
 

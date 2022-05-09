@@ -27,3 +27,5 @@ void freeArrayList(char** arrayStrings, int size);
 void printQueue (Queue q);
 
 char** arrayStrings_Copy (char** original, int array_size);
+
+char* get_status_from_queue(Queue q);

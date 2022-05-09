@@ -36,3 +36,5 @@ int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** bin
 void statusfunction();
 
 int sendtoclient(int nr);
+
+char* create_status_message(CONFIG c, Queue q, int vetor_instances_original[]);
