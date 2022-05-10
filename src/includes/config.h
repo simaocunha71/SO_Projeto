@@ -82,8 +82,6 @@ void print_num(CONFIG c);
 
 int size_array(CONFIG c);
 
-int* create_array_copy_of_instances(CONFIG c);
-
 int get_original_inst(int indice, int vetor_instances_original[]);
 
 char* get_status_from_config(CONFIG c, int vetor_instances_original[]);

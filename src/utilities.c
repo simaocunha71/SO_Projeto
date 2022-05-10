@@ -36,6 +36,7 @@ void redirection (char* filename, int std, int isInput){
 }
 
 char* inttoString(int n){
+    /*
    char* string = malloc(sizeof(int));
    if(n == 0) { 
        string[0] = '0'; 
@@ -65,6 +66,10 @@ char* inttoString(int n){
    if(isNegative)
        string[0] = '-';
    string[length] = '\0';
+   */
+  char* string = malloc(sizeof(char) * 50);
+  sprintf(string, "%d", n);
+   
 
    return string;
 }

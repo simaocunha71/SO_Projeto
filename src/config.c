@@ -151,15 +151,6 @@ int size_array(CONFIG c){
     return r;
 }
 
-int* create_array_copy_of_instances(CONFIG c){
-    int size = size_array(c);
-    int* v = malloc(sizeof(int) * size);
-    for(int i = 0; c != NULL && i < size; i++){
-        v[i] = c->max_instances;
-        c=c->next;
-    }
-    return v;
-}
 
 int get_original_inst(int indice, int vetor_instances_original[]){
     return vetor_instances_original[indice];
@@ -168,20 +159,50 @@ int get_original_inst(int indice, int vetor_instances_original[]){
 char* get_status_from_config(CONFIG c, int vetor_instances_original[]){
     char* r = malloc(sizeof(char));
     int indice = 0;
+    if (c == NULL)
+        printf("Config nula!\n");
     while(c != NULL){
         my_strcat(r,"transf ");
         my_strcat(r,c->binary_name);
         my_strcat(r,": ");
-        my_strcat(r,inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))); //instancias a decorrer
+        //printf("-------------------\n");
+        //printf("Original: %d\n", get_original_inst(indice, vetor_instances_original));
+        //printf("Atual: %d\n", c->max_instances);
+        //printf("Diferença: %d\n", get_original_inst(indice, vetor_instances_original) - c->max_instances);
+        //printf("Modulo: %d\n", abs(get_original_inst(indice, vetor_instances_original) - c->max_instances));
+        //printf("GANDA NUMERO: %d\n", number1);
+        //printf("-------------------\n");
+        //my_strcat(r,inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))); //O PROBLEMA ESTA AQUI
         my_strcat(r,"/");
-        my_strcat(r,inttoString(c->max_instances));
+        //my_strcat(r,inttoString(c->max_instances)); ////O PROBLEMA ESTA AQUI
         my_strcat(r," (running/max)\n");
-        //printf("R:: %s\n", r); CORRIGIR ISTO
         indice++;
         c=c->next;
     }
+
+    //printf("Status Config -> %s\n", r); 
     
     return r;
+}
+
+CONFIG copy_config (CONFIG c){
+    CONFIG r = malloc(sizeof(struct configuration));
+    if (c == NULL)
+        return NULL;
+    r->binary_name = strdup(c->binary_name);
+    r->max_instances = c->max_instances;
+    r->path_name = strdup(c->path_name);
+    r->next = copy_config(c->next);
+    return r;
+}
+
+void free_config (CONFIG c){
+    CONFIG temp;
+    while(c != NULL){
+        temp = c;
+        c=c->next;
+        free(temp);
+    }
 }
 
 /*

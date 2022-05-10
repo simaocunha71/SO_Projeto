@@ -106,6 +106,9 @@ char* get_status_from_queue(Queue q){
         
         t=t->prox;        
     }
+
+    if(t == NULL)
+        my_strcat(r,"Queue vazia\n");
     
     
     return r; //provavelmente dá erro. Corrigir depois de get_status_from_config

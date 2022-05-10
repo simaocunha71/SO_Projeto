@@ -60,13 +60,14 @@ int main(int argc, char *argv[]){
         char buffer[size_buffer];
         ssize_t bytes_read;
 
-        printf("AQUIFRFd\n");
+        printf("inicio da resposta\n");
         //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
+        write(1,"\"", strlen("\""));
         while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
-            printf("\"%s\"\n", buffer);
             write(1,buffer,bytes_read);
         }
-        printf("AQUIFRFd\n");
+        write(1,"\"\n", strlen("\"\n"));
+        printf("fim da resposta\n");
 
         close(fifo_receive_fd);
         //unlink(str_pid_client);
