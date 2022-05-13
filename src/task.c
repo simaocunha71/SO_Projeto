@@ -84,31 +84,31 @@ void printQueue (Queue q){
 }
 
 char* get_status_from_queue(Queue q){
-    char* r = malloc(sizeof(char));
+    char* r = malloc(sizeof(char) * 100000);
     TASK t = q->inicio;
     while(t != NULL){
-        my_strcat(r,"task #");
-        my_strcat(r,inttoString(t->id));
-        my_strcat(r,": proc-file ");
-        my_strcat(r,t->file_input);
-        my_strcat(r," ");
-        my_strcat(r,t->file_output);
-        my_strcat(r," ");
+        strcat(r,"task #");
+        strcat(r,inttoString(t->id));
+        strcat(r,": proc-file ");
+        strcat(r,t->file_input);
+        strcat(r," ");
+        strcat(r,t->file_output);
+        strcat(r," ");
         for(int i = 0; i < t->binaries_num; i++){
             if(i < t->binaries_num - 1){
-                my_strcat(r, t->binaries_to_execute[i]);
-                my_strcat(r," ");
+                strcat(r, t->binaries_to_execute[i]);
+                strcat(r," ");
             }
             else
-                my_strcat(r, t->binaries_to_execute[i]);
+                strcat(r, t->binaries_to_execute[i]);
         }
-        my_strcat(r,"\n");
+        strcat(r,"\n");
         
         t=t->prox;        
     }
 
     if(t == NULL)
-        my_strcat(r,"Queue vazia\n");
+        strcat(r,"Queue vazia\n");
     
     
     return r; //provavelmente dá erro. Corrigir depois de get_status_from_config

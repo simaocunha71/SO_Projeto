@@ -157,28 +157,34 @@ int get_original_inst(int indice, int vetor_instances_original[]){
 }
 
 char* get_status_from_config(CONFIG c, int vetor_instances_original[]){
-    char* r = malloc(sizeof(char));
+    char* r = malloc(sizeof(char) * 100000);
     int indice = 0;
     if (c == NULL)
         printf("Config nula!\n");
     while(c != NULL){
-        my_strcat(r,"transf ");
-        my_strcat(r,c->binary_name);
-        my_strcat(r,": ");
+        strcat(r,"transf ");
+        strcat(r,c->binary_name);
+        strcat(r,": ");
         //printf("-------------------\n");
         //printf("Original: %d\n", get_original_inst(indice, vetor_instances_original));
         //printf("Atual: %d\n", c->max_instances);
         //printf("Diferença: %d\n", get_original_inst(indice, vetor_instances_original) - c->max_instances);
         //printf("Modulo: %d\n", abs(get_original_inst(indice, vetor_instances_original) - c->max_instances));
-        //printf("GANDA NUMERO: %d\n", number1);
+        //printf("TESTE: %s\n", inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances)));
         //printf("-------------------\n");
-        //my_strcat(r,inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))); //O PROBLEMA ESTA AQUI
-        my_strcat(r,"/");
-        //my_strcat(r,inttoString(c->max_instances)); ////O PROBLEMA ESTA AQUI
-        my_strcat(r," (running/max)\n");
+        strcat(r,inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))); //O PROBLEMA ESTA AQUI
+        strcat(r,"/");
+        strcat(r,inttoString(c->max_instances)); ////O PROBLEMA ESTA AQUI
+        strcat(r," (running/max)\n");
+        //printf("-------------------\n");
+        //printf("%s\n",r);
+        //printf("-------------------\n");
         indice++;
+        //printf("Incrementei. \n");
         c=c->next;
+        //printf("Avancei. \n");
     }
+    //printf("ACABEI\n");
 
     //printf("Status Config -> %s\n", r); 
     

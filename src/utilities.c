@@ -69,7 +69,7 @@ char* inttoString(int n){
    */
   char* string = malloc(sizeof(char) * 50);
   sprintf(string, "%d", n);
-   
+  //printf("SPResult: %s\n",string);
 
    return string;
 }

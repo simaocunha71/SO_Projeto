@@ -123,13 +123,13 @@ int sendtoclient(int nr){
 
 char* create_status_message(CONFIG c, Queue q, int vetor_instances_original[]){
     char* status_config = get_status_from_config(c,vetor_instances_original);
-    //printf("SC: %s\n", status_config);
-    //char* status_queue = get_status_from_queue(q);
-    //printf("SQ: %s\n", status_queue);
+    printf("SC: %s\n", status_config);
+    char* status_queue = get_status_from_queue(q);
+    printf("SQ: %s\n", status_queue);
     char* r = malloc(sizeof(char));
-    //my_strcat(r,status_queue);
+    my_strcat(r,status_queue);
     my_strcat(r,status_config);
-    //free(status_queue);
+    free(status_queue);
     free(status_config);
     return r;
 }
