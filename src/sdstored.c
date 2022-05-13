@@ -121,17 +121,10 @@ int sendtoclient(int nr){
 
 }
 
-char* create_status_message(CONFIG c, Queue q, int vetor_instances_original[]){
-    char* status_config = get_status_from_config(c,vetor_instances_original);
-    printf("SC: %s\n", status_config);
-    char* status_queue = get_status_from_queue(q);
-    printf("SQ: %s\n", status_queue);
-    char* r = malloc(sizeof(char));
-    my_strcat(r,status_queue);
-    my_strcat(r,status_config);
-    free(status_queue);
-    free(status_config);
-    return r;
+void create_status_message(int fileDescriptor, CONFIG c, Queue q, int vetor_instances_original[]){
+    get_status_from_queue(fileDescriptor, q);
+    get_status_from_config(fileDescriptor, c,vetor_instances_original);
+
 }
 
 
@@ -207,10 +200,9 @@ int main(int argc, char const *argv[]){
                 //write(client_write, executing_message, strlen(executing_message));
                 if(fork() == 0){
                     CONFIG copy2 = copy_config(c);
-                    char* status_message = create_status_message(copy2,q, vector_originalInstances);
+                    create_status_message(client_write,copy2,q, vector_originalInstances);
                     //free(copy);
                     //printf("%s\n", status_message);
-                    write(client_write, status_message, strlen(status_message));
                     
                     close(client_write);
                     close(fifo_fd_write);

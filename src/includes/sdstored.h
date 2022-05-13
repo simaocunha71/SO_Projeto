@@ -37,4 +37,4 @@ void statusfunction();
 
 int sendtoclient(int nr);
 
-char* create_status_message(CONFIG c, Queue q, int vetor_instances_original[]);
+void create_status_message(int fileDescriptor, CONFIG c, Queue q, int vetor_instances_original[]);

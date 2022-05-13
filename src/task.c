@@ -83,35 +83,30 @@ void printQueue (Queue q){
 
 }
 
-char* get_status_from_queue(Queue q){
-    char* r = malloc(sizeof(char) * 100000);
+void get_status_from_queue(int fileDescriptor, Queue q){
     TASK t = q->inicio;
+    if(t == NULL)
+        write(fileDescriptor, "Queue vazia!\n", strlen("Queue vazia!\n"));
     while(t != NULL){
-        strcat(r,"task #");
-        strcat(r,inttoString(t->id));
-        strcat(r,": proc-file ");
-        strcat(r,t->file_input);
-        strcat(r," ");
-        strcat(r,t->file_output);
-        strcat(r," ");
+        write(fileDescriptor, "task #", strlen("task #"));
+        write(fileDescriptor, inttoString(t->id), strlen(inttoString(t->id)));
+        write(fileDescriptor, ": proc-file ", strlen(": proc-file "));
+        write(fileDescriptor, t->file_input, strlen(t->file_input));
+        write(fileDescriptor, " ", strlen(" "));
+        write(fileDescriptor, t->file_output, strlen(t->file_output));
+        write(fileDescriptor, " ", strlen(" "));
         for(int i = 0; i < t->binaries_num; i++){
             if(i < t->binaries_num - 1){
-                strcat(r, t->binaries_to_execute[i]);
-                strcat(r," ");
+                write(fileDescriptor, t->binaries_to_execute[i], strlen(t->binaries_to_execute[i]));
+                write(fileDescriptor, " ", strlen(" "));
             }
             else
-                strcat(r, t->binaries_to_execute[i]);
+                write(fileDescriptor, t->binaries_to_execute[i], strlen(t->binaries_to_execute[i]));
         }
-        strcat(r,"\n");
+        write(fileDescriptor, "\n", strlen("\n"));
         
         t=t->prox;        
     }
-
-    if(t == NULL)
-        strcat(r,"Queue vazia\n");
-    
-    
-    return r; //provavelmente dá erro. Corrigir depois de get_status_from_config
 }
 
 /*
