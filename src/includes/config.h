@@ -85,3 +85,7 @@ int size_array(CONFIG c);
 int get_original_inst(int indice, int vetor_instances_original[]);
 
 void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_original[]);
+
+void free_config (CONFIG c);
+
+CONFIG copy_config (CONFIG c);

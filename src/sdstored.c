@@ -122,7 +122,7 @@ int sendtoclient(int nr){
 }
 
 void create_status_message(int fileDescriptor, CONFIG c, Queue q, int vetor_instances_original[]){
-    get_status_from_queue(fileDescriptor, q);
+    get_status_from_queue (fileDescriptor, q);
     get_status_from_config(fileDescriptor, c,vetor_instances_original);
 
 }
@@ -147,7 +147,7 @@ int main(int argc, char const *argv[]){
         vector_originalInstances[i] = copy->max_instances;
         copy = copy->next;
     }
-
+    free_config(copy);
 
     
 
@@ -196,12 +196,8 @@ int main(int argc, char const *argv[]){
         if (fork() == 0) {                    //HERE!!! -> Solucao encontrado para os pedidos concorrentes
             //Execução do comando "status"
             if(strcmp(operation_mode, "S") == 0){
-                //char* executing_message = "STATUS executing...\n";
-                //write(client_write, executing_message, strlen(executing_message));
                 if(fork() == 0){
-                    CONFIG copy2 = copy_config(c);
-                    create_status_message(client_write,copy2,q, vector_originalInstances);
-                    //free(copy);
+                    create_status_message(client_write,c,q, vector_originalInstances);
                     //printf("%s\n", status_message);
                     
                     close(client_write);
@@ -220,10 +216,10 @@ int main(int argc, char const *argv[]){
                 binaries_to_execute = create_binaries_array(buffer_copy, number_of_commands);
                 if (isEmpty(q)){
                     if(canExecuteBinaries(c, binaries_to_execute,number_of_commands) == 1){
+                        char* executing_message = "executing...\n";
+                        write(client_write, executing_message, strlen(executing_message));
+                        request_enter(c,binaries_to_execute,number_of_commands);
                         if(fork() == 0){
-                            char* executing_message = "executing...\n";
-                            write(client_write, executing_message, strlen(executing_message));
-                            request_enter(c,binaries_to_execute,number_of_commands);
                             //print_num(c);       // print das instancias (debug)
                             sleep(5);
                             if(execute_commands_in_pipeline(c,inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
@@ -235,7 +231,10 @@ int main(int argc, char const *argv[]){
                             close(fifo_fd);
                             exit(0);
                         }
-                        wait(NULL);
+                        else{
+                            request_out(c,binaries_to_execute,number_of_commands);
+                            wait(NULL);
+                        }
 
                         //escrevemos no cliente no cliente que concluímos o pedido deles
                         char* success_message = "done!\n";
@@ -255,13 +254,14 @@ int main(int argc, char const *argv[]){
                 }
                 else{
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
-                        //remove_task(q);
+                        remove_task(q);
+                        //Escrever ao cliente que vamos executar o pedido dele
+                        char* executing_message = "executing...\n";
+                        write(client_write, executing_message, strlen(executing_message));
+                        //print_num(c);
+                        request_enter(c,binaries_to_execute,number_of_commands);
                         if(fork() == 0){
-                            //Escrever ao cliente que vamos executar o pedido dele
-                            char* executing_message = "executing...\n";
-                            write(client_write, executing_message, strlen(executing_message));
-                            print_num(c);
-                            request_enter(c,binaries_to_execute,number_of_commands);
+
                             sleep(5);
                             if(execute_commands_in_pipeline(c,q->inicio->file_input,
                                                               q->inicio->file_output,
@@ -269,14 +269,17 @@ int main(int argc, char const *argv[]){
                                                               q->inicio->binaries_num) != 0){ 
                                 perror("Erro a efetuar a execução da pipeline dos binários");
                             }
-                            request_out(c,binaries_to_execute,number_of_commands);                  
+                                              
                             close(client_write);
                             close(fifo_fd_write);
                             close(fifo_fd);
                             exit(0);
                         }
-                        remove_task(q);    //acho que e aqui, nao la em cima
-                        wait(NULL);
+                        else{
+                            request_out(c,binaries_to_execute,number_of_commands);
+                            //remove_task(q);    //acho que e aqui, nao la em cima
+                            wait(NULL);
+                        }
 
                         //escrevemos no cliente no cliente que concluímos o pedido deles
                         char* success_message = "done!\n";

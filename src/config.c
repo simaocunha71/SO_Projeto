@@ -62,10 +62,8 @@ void execute_config (CONFIG cs, char* binary_name){
     CONFIG c = get_Config(binary_name,cs);
     
     if (c != NULL){
-        changeInstances(cs,binary_name,"dec");
         execl(c->path_name,c->binary_name, NULL);
         perror("Erro a executar o binário");
-
     }
 }
 
