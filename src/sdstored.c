@@ -254,7 +254,7 @@ int main(int argc, char const *argv[]){
                 }
                 else{
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
-                        remove_task(q);
+                        //remove_task(q);
                         //Escrever ao cliente que vamos executar o pedido dele
                         char* executing_message = "executing...\n";
                         write(client_write, executing_message, strlen(executing_message));
@@ -277,7 +277,7 @@ int main(int argc, char const *argv[]){
                         }
                         else{
                             request_out(c,binaries_to_execute,number_of_commands);
-                            //remove_task(q);    //acho que e aqui, nao la em cima
+                            remove_task(q);    //acho que e aqui, nao la em cima
                             wait(NULL);
                         }
 
