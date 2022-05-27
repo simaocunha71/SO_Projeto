@@ -49,6 +49,7 @@ int main(int argc, char *argv[]){
         /***************************************Resposta recebida pelo cliente**********************************************/
         
         //Abrimos o descritor de leitura
+
         int fifo_receive_fd;
         if((fifo_receive_fd = open(str_pid_client, O_RDONLY)) < 0){
             perror("Erro a abrir o fifo com o pedido do cliente");
@@ -64,13 +65,14 @@ int main(int argc, char *argv[]){
         //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
         write(1,"\"", strlen("\""));
         while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
+            
             write(1,buffer,bytes_read);
         }
         write(1,"\"\n", strlen("\"\n"));
         printf("fim da resposta\n");
 
         close(fifo_receive_fd);
-        //unlink(str_pid_client);
+        unlink(str_pid_client);
     }
     else if(strcmp(argv[1], "proc-file") == 0){
 
@@ -138,9 +140,14 @@ int main(int argc, char *argv[]){
         char buffer[size_buffer];
         ssize_t bytes_read;
 
-
+        int flag =1;
         //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
-        while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
+        while(flag && (bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
+            buffer[bytes_read]='\0';
+            if(strcmp(buffer,"done!")==0){
+                flag = 0;
+                close(fifo_receive_fd);
+            }
             write(1,buffer,bytes_read);
         }
 

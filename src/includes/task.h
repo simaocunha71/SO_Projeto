@@ -18,7 +18,7 @@ typedef struct queue {
 
 Queue init_queue();
 
-void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_execute, int number_of_binaries);
+void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_execute, int number_of_binaries, int client_pid);
 
 void remove_task (Queue q);
 

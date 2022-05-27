@@ -158,7 +158,8 @@ void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_or
     int indice = 0;
     if (c == NULL)
         write(fileDescriptor, "Config nula!\n ", strlen("Config nula!\n"));
-    while(c != NULL){
+    while(c != NULL && indice < 7){
+        
         write(fileDescriptor, "transf ", strlen("transf "));
         write(fileDescriptor, c->binary_name, strlen(c->binary_name));
         write(fileDescriptor, ": ", strlen(": "));

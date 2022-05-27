@@ -88,7 +88,7 @@ char** create_binaries_array(char* buff, int number_of_binaries){
     int i;
     for(i = 0; i < number_of_binaries - 1 && buffer != NULL; i++){
         results[i] = strdup(strsep(&buffer, " "));
-        //printf("Results %d-> %s\n",i, results[i]);
+       // printf("Results %d-> %s\n",i, results[i]);
     }
     results[i] = strdup(strsep(&buffer, "\0"));
     //printf("Results %d-> %s\n",i, results[i]);

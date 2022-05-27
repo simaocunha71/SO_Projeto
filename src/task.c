@@ -1,6 +1,6 @@
 #include "includes/task.h"
 
-int task_id = 1;
+//int task_id = 1;
 
 Queue init_queue(){
     Queue q = malloc(sizeof(struct queue));
@@ -10,14 +10,15 @@ Queue init_queue(){
     return q;
 }
 int isEmpty (Queue q){
-    return (q->inicio==NULL);
+    if(q) return (q->inicio == NULL);
+    return (q ==NULL);
 }
 
-void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_execute, int number_of_binaries){
+void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_execute, int number_of_binaries, int client_pid){
     TASK new = malloc (sizeof(struct task));
     if (new != NULL){
-        new->id = task_id;
-        task_id++;
+        new->id = client_pid;
+        //task_id++;
         new->file_input = strdup(file_input);
         new->file_output = strdup(file_output);
         new->binaries_num = number_of_binaries;
@@ -33,20 +34,22 @@ void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_
             q->fim = q->fim->prox;
         }
     }
-    printQueue(q);
+    //NAO SE PODE USAR PQ USAMOS O STDOUT PRA ESCREVER NO FICHEIRO, O USO DE PRINTFS ESCREVE NO FICHEIRO
+    //printQueue(q);
 }
 
 
 void remove_task (Queue q){
-    if (q->inicio != NULL){
+    if ((q)->inicio != NULL){
         struct task *temp;
-        temp = q->inicio;
-        q->inicio = q->inicio->prox;
+        temp = (q)->inicio;
+        (q)->inicio = (q)->inicio->prox;
         free(temp->file_input);
         free(temp->file_output);
         freeArrayList(temp->binaries_to_execute, temp->binaries_num); 
     }
-    printQueue(q);
+    //NAO SE PODE USAR PQ USAMOS O STDOUT PRA ESCREVER NO FICHEIRO, O USO DE PRINTFS ESCREVE NO FICHEIRO
+    //printQueue(*q);
 }
 
 void freeArrayList(char** arrayStrings, int size){
@@ -114,13 +117,15 @@ int main(){
     Queue q = init_queue();
     char* arrayB[] = {"binario1", "binario2", "binario3"};
     printf("Add1\n");
-    add_task(q,"input", "output", arrayB,3);
+    add_task(q,"input", "output", arrayB,3, 1);
     printf("Add2\n");
-    add_task(q,"input2", "output2", arrayB,3);
-    //printQueue(q);
+    add_task(q,"input2", "output2", arrayB,3, 2);
+    printQueue(q);
     printf("rem1\n");
     remove_task(q);
-    //printf("REM\n");
-    //printQueue(q);
+    remove_task(q);
+    printf("REM\n");
+    printQueue(q);
+
 }
 */
