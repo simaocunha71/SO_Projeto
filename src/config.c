@@ -166,7 +166,8 @@ void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_or
         write(fileDescriptor, inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances)), 
                        strlen(inttoString(abs(get_original_inst(indice, vetor_instances_original) - c->max_instances))));
         write(fileDescriptor, "/", strlen("/"));
-        write(fileDescriptor, inttoString(c->max_instances), strlen(inttoString(c->max_instances)));
+        write(fileDescriptor, inttoString(get_original_inst(indice, vetor_instances_original)), 
+                       strlen(inttoString(get_original_inst(indice, vetor_instances_original))));
         write(fileDescriptor, " (running/max)\n", strlen(" (running/max)\n"));
 
         indice++;

@@ -15,35 +15,39 @@ int isEmpty (Queue q){
 }
 
 void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_execute, int number_of_binaries, int client_pid){
-    TASK new = malloc (sizeof(struct task));
-    if (new != NULL){
-        new->id = client_pid;
-        //task_id++;
-        new->file_input = strdup(file_input);
-        new->file_output = strdup(file_output);
-        new->binaries_num = number_of_binaries;
-        new->binaries_to_execute = arrayStrings_Copy(binaries_to_execute, number_of_binaries);
-        new->prox = NULL;
 
-        if (q->fim == NULL){
-            q->inicio = new;
-            q->fim = new;
+        TASK new = malloc (sizeof(struct task));
+        if (new != NULL){
+            new->id = client_pid;
+            new->file_input = strdup(file_input);
+            new->file_output = strdup(file_output);
+            new->binaries_num = number_of_binaries;
+            new->binaries_to_execute = arrayStrings_Copy(binaries_to_execute, number_of_binaries);
+            new->prox = NULL;
+            if (q->fim == NULL){
+                q->inicio = new;
+                q->fim = new;
+            }
+            else{
+                q->fim->prox = new;
+                q->fim = q->fim->prox;
+            }  
         }
-        else{
-            q->fim->prox = new;
-            q->fim = q->fim->prox;
-        }
-    }
     //NAO SE PODE USAR PQ USAMOS O STDOUT PRA ESCREVER NO FICHEIRO, O USO DE PRINTFS ESCREVE NO FICHEIRO
     //printQueue(q);
+    
 }
 
 
 void remove_task (Queue q){
-    if ((q)->inicio != NULL){
-        struct task *temp;
+    if (q->inicio != NULL){
+        struct task * temp;
         temp = (q)->inicio;
-        (q)->inicio = (q)->inicio->prox;
+        (q)->inicio = temp->prox;
+        if (q->fim == q->inicio) {
+            q->fim = NULL; 
+        }
+        
         free(temp->file_input);
         free(temp->file_output);
         freeArrayList(temp->binaries_to_execute, temp->binaries_num); 
@@ -125,6 +129,8 @@ int main(){
     remove_task(q);
     remove_task(q);
     printf("REM\n");
+    printQueue(q);
+    add_task(q,"input3", "output3", arrayB,3, 1);
     printQueue(q);
 
 }
