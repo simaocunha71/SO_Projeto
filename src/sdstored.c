@@ -213,6 +213,8 @@ int main(int argc, char const *argv[]){
 
         if(strcmp(client_pid, "1") == 0){
             write(original_stdout, "\n cliente pid e 1\n", strlen("\n cliente pid e 1\n"));
+            char* real_client_pid = strdup(operation_mode);
+            free(real_client_pid);
             write(original_stdout, "AAA1\n", strlen("AAA1\n"));
             char* inputfile = strdup(strsep(&buffer_copy, " "));
             write(original_stdout, "AAA2\n", strlen("AAA1\n"));
