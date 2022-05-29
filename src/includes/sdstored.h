@@ -12,29 +12,35 @@
 #define BUFFERSIZE 1024
 
 /**
- * @brief Inicializa o servidor com o carregamento das configurações do ficheiro de configuração
+ * @brief Inicializa o servidor, criando a lista ligada CONFIG
  * @param config_filename Ficheiro de configuração
- * @param binarys_foldername Pasta com os binários a executar
- * @return Configuração com todos os binários a executar na forma de lista ligada
+ * @param binarys_folder Pasta onde estão os ficheiros objeto dos binários a executar
+ * @return CONFIG Lista ligada CONFIG
  */
-CONFIG start_server(char* config_filename, char* binarys_foldername);
-
-//DEBUG
-void printConfigs(CONFIG c);
+CONFIG start_server(char* config_filename, char* binarys_folder);
 
 /**
- * @brief Executa vários binários com recurso a pipes anónimos, guardando o resultado no ficheiro de output
- * @param c Lista ligada de configurações
+ * @brief Executa uma pipeline de binários a executar com recurso a pipes anónimos
+ * @param c Lista ligada CONFIG
  * @param input Ficheiro de input
  * @param output Ficheiro de output
  * @param binaries_array Array de binários a executar
- * @param number_of_commands Número de binários a executar
- * @return int 0 se sucesso, -1 caso contrário
+ * @param number_of_commands Tamanho do array de binários a executar
+ * @return int 0 se sucesso
  */
 int execute_commands_in_pipeline(CONFIG c, char* input, char* output, char** binaries_array, int number_of_commands);
 
-void statusfunction();
-
-int sendtoclient(int nr);
-
+/**
+ * @brief Função principal encarregue de criar a mensagem do comando status
+ * @param fileDescriptor Cliente que vai receber a resposta
+ * @param c Lista ligada de configurações
+ * @param q Queue de tasks
+ * @param vetor_instances_original Array que contém as instâncias originais na mesma ordem que ocorrem na lista ligada original 
+ */
 void create_status_message(int fileDescriptor, CONFIG c, Queue q, int vetor_instances_original[]);
+
+/**
+ * @brief Fecha o servidor
+ * @param signum Sinal
+ */
+void close_server(int signum);

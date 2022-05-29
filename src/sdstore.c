@@ -4,7 +4,6 @@
 
 // Cliente
 
-//$ ./sdstore proc-file FILEINPUT FILEOUTPUT bcompress nop gcompress encrypt nop
 int main(int argc, char *argv[]){
 
     if (argc < 2 && strcmp(argv[1], "status") == 0) {
@@ -40,9 +39,7 @@ int main(int argc, char *argv[]){
             return -1;
         }
 
-
-        //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_send_fd,info_toSend,strlen(info_toSend)); //strlen(x) + 1 por causa do '\0'
+        write(fifo_send_fd,info_toSend,strlen(info_toSend)); 
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);
@@ -62,15 +59,10 @@ int main(int argc, char *argv[]){
         char buffer[size_buffer];
         ssize_t bytes_read;
 
-        printf("inicio da resposta\n");
-        //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
-        write(1,"\"", strlen("\""));
         while((bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
-            
             write(1,buffer,bytes_read);
         }
-        write(1,"\"\n", strlen("\"\n"));
-        printf("fim da resposta\n");
+
 
         close(fifo_receive_fd);
         unlink(str_pid_client);
@@ -86,8 +78,6 @@ int main(int argc, char *argv[]){
         for(int i = 2; i < argc; i++)
             size_of_args += strlen(argv[i]);
 
-        //String aonde vai ter toda a informação enviada para o servidor: capacidade para o pid + tamanho das strings que compoe a informação
-        //Formato desta string com, por exemplo, 2 binários a executar: "PID_Cliente File_Input File_Output Binario1 Binario2"
         char* info_toSend = malloc(sizeof(char)); 
         my_strcat(info_toSend, str_pid_client);
         my_strcat(info_toSend, " "); 
@@ -105,9 +95,6 @@ int main(int argc, char *argv[]){
         if(mkfifo(str_pid_client, 0666) < 0)
             perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
 
-        //printf("[Cli]: Criei fifo com pid\n");
-
-
         //vamos abrir o pipe cliente->servidor
         int fifo_send_fd;
         if((fifo_send_fd = open(FIFO_NAME, O_WRONLY)) < 0){
@@ -115,20 +102,10 @@ int main(int argc, char *argv[]){
             return -1;
         }
 
-       // printf("[Cli]: Abri descritor de pid de cliente com pid\n");
-        write(1, info_toSend, strlen(info_toSend));
-        write(1,"\nbarra n?", strlen("\nbarra n?"));
-        //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_send_fd,info_toSend,strlen(info_toSend)); //strlen(x) + 1 por causa do '\0'
+        write(fifo_send_fd,info_toSend,strlen(info_toSend)); 
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);
-       // printf("[Cli]: Fechei descritor de pid de cliente com pid\n");
-
-        //////////////////////////////////////////////////////////////////////////////
-        //NOTA:
-        //abrimos este pipe primeiro pq senao pode dar conflito mais tarde no servidor
-        //////////////////////////////////////////////////////////////////////////////
 
         /***************************************Resposta recebida pelo cliente**********************************************/
         //Abrimos o descritor de leitura
@@ -137,7 +114,6 @@ int main(int argc, char *argv[]){
             perror("Erro a abrir o fifo com o pedido do cliente");
             return -1;
         }
-       // printf("[Cli]: Abri descritor de fifo para receber resposta\n");
         //Inicializar o buffer para leitura
         int size_buffer = 1024;
         char buffer[size_buffer];
@@ -155,10 +131,7 @@ int main(int argc, char *argv[]){
         }
 
         close(fifo_receive_fd);
-        //printf("[Cli]: Fechei descritor de fifo para receber resposta\n");
-        //unlink(FIFO_NAME);
         unlink(str_pid_client);
-       // printf("[Cli]: Apaguei fifo\n");
     }
     else {
         perror("Comando desconhecido! Tenta outra vez...");
@@ -167,24 +140,3 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
-
-
-
-
-
-
-
-/*
-    printf("File input: %s\n",file_input);
-    printf("File output: %s\n", file_output);
-
-    for (i = 0; i < argc-4; i++)
-    {
-        printf("Bin nº %d: %s\n",i+1,binaries_to_execute[i]);
-    }
-    
-    if ((strcmp(argv[1], "proc-file") == 0))
-        execute_bins(argv, argc);
-    else
-        printf("DEBUG: Provavelmente falta a flag \"proc-file\"\n");
-*/

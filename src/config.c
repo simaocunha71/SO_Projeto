@@ -2,7 +2,6 @@
 
 CONFIG create_config (char* line, char* binarys_folder, CONFIG c){
 
-    //Parse da linha do ficheiro de configuração
     char* name = strdup(strsep(&line," "));
     int num = atoi(strsep(&line,"\n"));
 
@@ -25,7 +24,6 @@ CONFIG create_config (char* line, char* binarys_folder, CONFIG c){
         else 
             return new;
     }
-
     return NULL;
 }
 
@@ -67,7 +65,6 @@ void execute_config (CONFIG cs, char* binary_name){
     }
 }
 
-//Talvez diminuir ao nº de instancias para fazer algum controlo de binarios nesta funçao
 CONFIG get_Config(char* binary_name, CONFIG cs){
     CONFIG c = malloc (sizeof (struct configuration));
     int found = 0;
@@ -145,11 +142,6 @@ int canExecuteBinaries(CONFIG c, char** binaries_array, int number_of_commands){
     return flag;
 }
 
-int match_binary_with_instances(CONFIG cs, char* binary_name){
-    CONFIG c = get_Config(binary_name,cs);
-    return c->max_instances > 0;
-}
-
 void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries){
     int i;
     for(i = 0; i < number_of_binaries; i++) {
@@ -162,14 +154,6 @@ void request_out(CONFIG cs, char** binaries_array, int number_of_binaries){
     int i;
     for(i = 0; i < number_of_binaries; i++) {
         changeInstances(cs,binaries_array[i],"inc");
-    }
-}
-
-void print_num(CONFIG c){
-    while (c != NULL)
-    {
-        printf("%s -> %d\n", c->binary_name, c->max_instances);
-        c = c->next;
     }
 }
 
@@ -190,7 +174,7 @@ int get_original_inst(int indice, int vetor_instances_original[]){
 void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_original[]){
     int indice = 0;
     if (c == NULL)
-        write(fileDescriptor, "Config nula!\n ", strlen("Config nula!\n"));
+        write(fileDescriptor, "CONFIG NULL!\n ", strlen("CONFIG NULL\n"));
     while(c != NULL && indice < 7){
         
         write(fileDescriptor, "transf ", strlen("transf "));
@@ -206,7 +190,6 @@ void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_or
         indice++;
         c=c->next;
     }
-
 }
 
 CONFIG copy_config (CONFIG c){
@@ -228,67 +211,3 @@ void free_config (CONFIG c){
         free(temp);
     }
 }
-
-/*
-int main(){
-    CONFIG c = load_configurations("../bin/sdstore.conf","../obj/");
-
-     Queue q = init_queue();
-
-    
-    printf("Instancias antes:\n");
-
-    print_num(c);
-
-    printf("\n");
-
-    char* args = "nop nop bcompress nop bdecompress";
-    int num = get_binaries_num(args);
-    char** bin = NULL;
-    bin = create_binaries_array(args,num);
-
-    request_enter(c,bin,num);
-
-    printf("Instancias depois de entrar:\n");
-
-    print_num(c);
-
-    printf("\n");
-
-    printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
-
-    printf("\n");
-
-    if (canExecuteBinaries(c, bin, num) == 0){
-        add_task(q,"Input debug","Output Debug",bin,num);
-    }
-
-    //printQueue(q);
-
-    printf("\n");
-
-    request_out(c,bin,num);
-
-    printf("Instancias depois de sair:\n");
-
-    print_num(c);
-
-    printf("\n");
-
-    printf("Pode entrar mais pedidos?: %d\n",canExecuteBinaries(c,bin,num));
-
-    printf("\n");
-
-    if (canExecuteBinaries(c,bin,num) == 1)
-    {
-        remove_task(q);
-    }
-
-    //printQueue(q);
-
-    printf("\n");
-    
-
-    return 0;
-}
-*/

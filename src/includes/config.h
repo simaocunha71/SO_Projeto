@@ -1,8 +1,5 @@
 #include "../utilities.c"
 
-/**
- * @brief Lista ligada que constitui um binário e o número máximo de instâncias que podem ocorrer (a usar os valores do enunciado)
- */
 typedef struct configuration{
     char* binary_name;
     char* path_name;
@@ -11,81 +8,110 @@ typedef struct configuration{
 }*CONFIG;
 
 /**
- * @brief Cria uma configuração
+ * @brief Cria uma configuração sob a forma de lista ligada, efetuando parse de uma linha do ficheiro de configuração
  * @param line Linha do ficheiro de configuração
- * @param binarys_folder Pasta com os binários a executar
- * @param c Lista das configurações
- * @return CONFIG Lista com a configuração criada
+ * @param binarys_folder Pasta onde estão os ficheiros objeto dos binários a executar
+ * @param c Lista ligada
+ * @return CONFIG Lista ligada resultante
  */
 CONFIG create_config (char* line, char* binarys_folder, CONFIG c);
 
 /**
- * @brief Carrega todas as structs das configurações para a struct principal
- * @param config_filename Nome do ficheiro de configuração
- * @param binarys_folder Pasta que contém todos os binários a executar
- * @return CONFIGURATIONS Struct configurations criada
+ * @brief Lê o ficheiro de configuração, criando a lista ligada de configurações
+ * @param config_filename Ficheiro de configuração
+ * @param binarys_folder Pasta onde estão os ficheiros objeto dos binários a executar
+ * @return CONFIG Lista ligada resultante
  */
 CONFIG load_configurations (char* config_filename, char* binarys_folder);
 
 /**
- * @brief Função que recebe o binário a executar e executa-o
- * @param cs Lista ligada dos binários a executar
+ * @brief Devolve o path para o ficheiro objeto de um dado binário
+ * @param binary_name Nome do binário
+ * @param binary_folder Pasta onde estão os ficheiros objeto dos binários a executar
+ * @return char* Path para o ficheiro objeto de um dado binário
+ */
+char* get_binary_filename (char* binary_name, char* binary_folder);
+
+/**
+ * @brief Executa um dado binário
+ * @param cs Configuração que contém todos os binários
  * @param binary_name Nome do binário a executar
  */
 void execute_config (CONFIG cs, char* binary_name);
 
 /**
- * @brief Devolve o path para o respetivo binário
+ * @brief Devolve uma cópia de um nó de uma configuração
  * @param binary_name Nome do binário
- * @param binary_folder Pasta onde se encontra todos os binários (ficheiros objeto)
- * @return char* Path do binário a executar
- */
-char* get_binary_filename (char* binary_name, char* binary_folder);
-
-/**
- * @brief Devolve a configuração com um determinado nome
- * @param binary_name Nome do binário que procuramos
- * @param cs Lista de configurações
- * @return CONFIG Configuração pretendida
+ * @param cs Lista ligada de configurações
+ * @return CONFIG Nó pretendido
  */
 CONFIG get_Config(char* binary_name, CONFIG cs);
 
 /**
- * @brief Incrementa ou decrementa o nº de instancias de um binario, consoante queremos libertá-lo ou decrementá-lo
- * @param c Configuração de binários
+ * @brief Altera as instâncias de um dado binário, consoante a operação dada
+ * @param c Lista ligada de configurações
  * @param binary Nome do binário
- * @param operation "dec" se queremos decrementar; "inc" se queremos incrementar
+ * @param operation "dec": decrementa; "inc": incrementa
  */
 void changeInstances(CONFIG c, char* binary, char* operation);
 
 /**
- * @brief Dado um array de binários e a lista ligada de configurações, verifica se pode executar todos os binários do array
- * @param c Lista ligada de binários
- * @param binaries_array Array de binários a executar
- * @return int 1 se sucesso, 0 caso contrário
+ * @brief Verifica se todos os binários contidos no array de binários podem ser executados
+ * @param c Lista ligada de configurações
+ * @param binaries_array Array de binários
+ * @param number_of_commands Tamanho do array de binários
+ * @return int 1 se verdade, 0 caso contrário
  */
-int canExecuteBinaries(CONFIG c, char** binaries_array,int number_of_commands);
-
-int match_binary_with_instances(CONFIG cs, char* binary_name);
+int canExecuteBinaries(CONFIG c, char** binaries_array, int number_of_commands);
 
 /**
- * @brief Altera o numero das instancias (decrementa) de cada binario quando um pedido que os use começa a ser efetuado
+ * @brief Decrementa instâncias dos binários contidos no array (task entrará na queue)
+ * @param cs Lista ligada de configurações
+ * @param binaries_array Array de binários
+ * @param number_of_binaries Tamanho do array de binários
  */
 void request_enter(CONFIG cs, char** binaries_array, int number_of_binaries);
 
 /**
- * @brief Altera o numero das instancias (incrementa) de cada binario quando um pedido que os use acaba de ser efetuado
+ * @brief Incrementa instâncias dos binários contidos no array (task sairá da queue)
+ * @param cs Lista ligada de configurações
+ * @param binaries_array Array de binários
+ * @param number_of_binaries Tamanho do array de binários
  */
 void request_out(CONFIG cs, char** binaries_array, int number_of_binaries);
 
-void print_num(CONFIG c);
-
+/**
+ * @brief Calcula tamanho da lista ligada de configurações
+ * @param c Lista ligada de configurações
+ * @return int Tamanho da lista ligada
+ */
 int size_array(CONFIG c);
 
+/**
+ * @brief Devolve a instância máxima original de um binário
+ * @param indice Indice do array
+ * @param vetor_instances_original Array que contém as instâncias originais na mesma ordem que ocorrem na lista ligada original 
+ * @return int Instância máxima original
+ */
 int get_original_inst(int indice, int vetor_instances_original[]);
 
+/**
+ * @brief Envia para o cliente a parte da mensagem do comando status referente aos dados da CONFIG
+ * @param fileDescriptor Cliente para onde se vai enviar a resposta
+ * @param c Lista ligada de configurações
+ * @param vetor_instances_original Array que contém as instâncias originais na mesma ordem que ocorrem na lista ligada original 
+ */
 void get_status_from_config(int fileDescriptor, CONFIG c, int vetor_instances_original[]);
 
-void free_config (CONFIG c);
-
+/**
+ * @brief Copia toda a lista ligada para outra
+ * @param c Lista ligada original
+ * @return CONFIG Lista ligada cópia
+ */
 CONFIG copy_config (CONFIG c);
+
+/**
+ * @brief Liberta o espaço ocupado pela lista ligada CONFIG
+ * @param c Lista ligada de configurações
+ */
+void free_config (CONFIG c);

@@ -12,9 +12,6 @@
  * @param size Tamanho a ler
  * @return Nº de bytes lidos
  */
-
-//size_t readln(int fd, char* line, size_t size);
-
 size_t readln(int fd, char *line, size_t size);
 
 /**
@@ -24,19 +21,11 @@ size_t readln(int fd, char *line, size_t size);
  */
 int validate_binary_to_execute (char* binary_to_execute);
 
-/**
- * @brief Redireciona o std para o filedescriptor de um ficheiro
- * @param filename Nome do ficheiro
- * @param std STDIN, STDOUT ou STDERR
- * @param flag Diz se é ficheiro de input (0) ou de output (> 0)
- */
-void redirection (char* filename, int std, int isInput);
 
 /**
- * @brief Função que converte um numero em string, guardando o resultado em 'string'.
- * Adaptada de https://stackoverflow.com/questions/11819837/converting-integer-to-string-in-c-without-sprintf, do utilizador ExternCowWindows
- * @param n Numero a converter
- * @return String com o numero convertido
+ * @brief Converte um inteiro numa string
+ * @param n Número a converter
+ * @return char* String resultante
  */
 char* inttoString(int n);
 
