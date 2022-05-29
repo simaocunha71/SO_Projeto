@@ -207,7 +207,7 @@ int main(int argc, char const *argv[]){
                             _exit(0);
                         }
                         wait(NULL);
-                        write(task_client, "done!\n", strlen("done!\n"));     
+                        write(task_client, "concluded!\n", strlen("concluded!\n"));     
                         write(fifo_fd_write, request, strlen(request));                           
                         _exit(0);
                     }
@@ -231,7 +231,7 @@ int main(int argc, char const *argv[]){
                 if((real_client= open(real_client_pid, O_WRONLY)) < 0){
                     perror("Erro a abrir real_client");
                 }
-                write(real_client, "done!\n", strlen("done!\n"));
+                write(real_client, "concluded!\n", strlen("concluded!\n"));
                 close(real_client);
                 if(!isEmpty(q)){
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
@@ -274,7 +274,7 @@ int main(int argc, char const *argv[]){
                             }
                             wait(NULL);
 
-                            write(task_client, "done!\n", strlen("done!\n"));     
+                            write(task_client, "concluded!\n", strlen("concluded!\n"));     
                             write(fifo_fd_write, request, strlen(request));       
                             _exit(0);                    
 
