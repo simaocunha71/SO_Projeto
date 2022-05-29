@@ -24,7 +24,7 @@ void add_task (Queue q, char* file_input, char* file_output, char** binaries_to_
             new->binaries_num = number_of_binaries;
             new->binaries_to_execute = arrayStrings_Copy(binaries_to_execute, number_of_binaries);
             new->prox = NULL;
-            if (q->fim == NULL){
+            if (q->inicio == NULL){
                 q->inicio = new;
                 q->fim = new;
             }
@@ -128,10 +128,17 @@ int main(){
     printf("rem1\n");
     remove_task(q);
     remove_task(q);
-    printf("REM\n");
+    printf("REM2\n");
     printQueue(q);
     add_task(q,"input3", "output3", arrayB,3, 1);
+    printQueue(q);
+    remove_task(q);
+    printf("REMfinal\n");
+    printQueue(q);
+    add_task(q,"input3", "output3", arrayB,3, 1);
+    printf("Addfinal\n");
     printQueue(q);
 
 }
 */
+

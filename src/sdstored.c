@@ -203,10 +203,11 @@ int main(int argc, char const *argv[]){
 
         
         char* buffer_copy = strdup(buffer_from_fifo); //necessário fazer esta cópia porque o buffer_from_fifo vai ficar destruído depois do parse
+        my_strcat(buffer_copy,"\0");
         if(strcmp(buffer_copy, "1") == 0){
             //char* task_pid = strdup(strsep(&buffer_copy, " "));
             request_out(c,q->inicio->binaries_to_execute,q->inicio->binaries_num); 
-            remove_task(q);
+            //remove_task(q);
             write(original_stdout, "\nchegou1\n", strlen("\nchegou1\n"));
             if(!isEmpty(q)){
                 printQueue(q);
@@ -237,9 +238,9 @@ int main(int argc, char const *argv[]){
                         if((task_client= open(qID, O_WRONLY)) < 0){
                             perror("real_client_pid open error");
                         }
-                        write(task_client, "executing...\n", strlen("executing...\n"));
+                        write(task_client, "executing from mode 1...\n", strlen("executing from mode 1....\n"));
                         if(fork()==0){
-
+                            sleep(10);
                             if(execute_commands_in_pipeline(c,q->inicio->file_input,
                                                               q->inicio->file_output,
                                                               q->inicio->binaries_to_execute,
@@ -297,6 +298,11 @@ int main(int argc, char const *argv[]){
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
                         write(original_stdout, "\nmode 0:entrou na CanExec\n", strlen("\nmode 0:entrou na CanExec\n"));
                         request_enter(c,q->inicio->binaries_to_execute,q->inicio->binaries_num);
+                        char* input = strdup(q->inicio->file_input);
+                        char* output = strdup(q->inicio->file_output);
+                        char** bins = arrayStrings_Copy(q->inicio->binaries_to_execute,q->inicio->binaries_num);
+                        int num = q->inicio->binaries_num;
+                        remove_task(q);
                         write(original_stdout, "\nmode 0:entrou fez request_enter\n", strlen("\nmode 0:entrou fez request_enter\n"));
                         if(fork()==0){
                             int task_client;
@@ -305,12 +311,10 @@ int main(int argc, char const *argv[]){
                             if((task_client= open(qID, O_WRONLY)) < 0){
                                 perror("real_client_pid open error");
                             }
-                            write(task_client, "executing...\n", strlen("executing...\n"));
+                            write(task_client, "executing from mode 0....\n", strlen("executing from mode 0....\n"));
                             if(fork()==0){
-                                if(execute_commands_in_pipeline(c,q->inicio->file_input,
-                                                                  q->inicio->file_output,
-                                                                  q->inicio->binaries_to_execute,
-                                                                  q->inicio->binaries_num) != 0){ 
+                                sleep(10);
+                                if(execute_commands_in_pipeline(c,input,output,bins,num) != 0){ 
                                     perror("Erro a efetuar a execução da pipeline dos binários");
                                 }
                                 _exit(0);
@@ -350,11 +354,23 @@ int main(int argc, char const *argv[]){
                 }
                 //Execução do comando "proc-file"
                 if(strcmp(operation_mode, "P") == 0){
-                    char* request = malloc(strlen(buffer_copy)+ strlen(client_pid)+4);
-                    strcpy(request, "0 ");
-                    strcat(request, client_pid);
-                    strcat(request, " ");
-                    strcat(request,buffer_copy);
+                    //char* request = malloc(strlen(buffer_copy)+ strlen(client_pid)+4);
+                    write(original_stdout,"ola\n", strlen("ola\n"));
+                    char* request = malloc(sizeof(char));
+                    write(original_stdout,"ola2\n", strlen("ola2\n"));
+                    my_strcat(request, "0 ");
+                     write(original_stdout,"ola3\n", strlen("ola3\n"));
+                    my_strcat(request, client_pid);
+                     write(original_stdout,"ola4\n", strlen("ola2\n"));
+                    my_strcat(request, " ");
+                     write(original_stdout,"ola5\n", strlen("ola2\n"));
+                     write(original_stdout,"\nBuffer Copy: ",strlen("\nBuffer Copy: "));
+                     write(original_stdout,buffer_copy,strlen(buffer_copy));
+                     write(original_stdout,"\n",strlen("\n"));
+                    my_strcat(request,buffer_copy);
+                     write(original_stdout,"ola6\n", strlen("ola2\n"));
+                    my_strcat(request,"\0");
+                     write(original_stdout,"ola7\n", strlen("ola2\n"));
                     char* inputfile = strdup(strsep(&buffer_copy, " "));
                     char* outputfile= strdup(strsep(&buffer_copy, " "));
                     int number_of_commands = get_binaries_num(buffer_copy);
@@ -364,8 +380,11 @@ int main(int argc, char const *argv[]){
                     binaries_to_execute = create_binaries_array(buffer_copy, number_of_commands);
                     if(canExecuteBinaries(c, binaries_to_execute, number_of_commands)==1){
                         request_enter(c,binaries_to_execute,number_of_commands);
+                        write(original_stdout,"\nBuffer Copy 2nd: ",strlen("\nBuffer Copy 2nd: "));
+                        write(original_stdout,buffer_copy,strlen(buffer_copy));
+                        write(original_stdout,"\n",strlen("\n"));
                         if(fork()==0){
-                            char* executing_message = "executing...\n";
+                            char* executing_message = "executing from mode proc....\n";
                             write(client_write, executing_message, strlen(executing_message)+1);
                             write(original_stdout, "\na executar\n", strlen("\na executar\n"));
                             //printConfigs(c);
