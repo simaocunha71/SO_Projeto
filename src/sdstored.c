@@ -145,7 +145,6 @@ int main(int argc, char const *argv[]){
     //buffer para ler e escrever
     char buffer_from_fifo[BUFFERSIZE];
     ssize_t bytes_read;
-    int original_stdout = dup(1);
 
     while((bytes_read = readln(fifo_fd,buffer_from_fifo,BUFFERSIZE)) > 0){
         char* buffer_copy = strdup(buffer_from_fifo); //necessário fazer esta cópia porque o buffer_from_fifo vai ficar destruído depois do parse
@@ -207,7 +206,8 @@ int main(int argc, char const *argv[]){
                             _exit(0);
                         }
                         wait(NULL);
-                        write(task_client, "concluded!\n", strlen("concluded!\n"));     
+                        write(task_client, "concluded\n", strlen("concluded\n"));     
+                        close(task_client);
                         write(fifo_fd_write, request, strlen(request));                           
                         _exit(0);
                     }
@@ -231,13 +231,12 @@ int main(int argc, char const *argv[]){
                 if((real_client= open(real_client_pid, O_WRONLY)) < 0){
                     perror("Erro a abrir real_client");
                 }
-                write(real_client, "concluded!\n", strlen("concluded!\n"));
+                write(real_client, "concluded\n", strlen("concluded\n"));
                 close(real_client);
                 if(!isEmpty(q)){
                     if(canExecuteBinaries(c, q->inicio->binaries_to_execute, q->inicio->binaries_num)){
                         request_enter(c,q->inicio->binaries_to_execute,q->inicio->binaries_num);
                         char* inputs1 = strdup(q->inicio->file_input);
-                        write(original_stdout, inputs1, strlen(inputs1));
                         char* outputs1 = strdup(q->inicio->file_output);
                         char** bins1 = arrayStrings_Copy(q->inicio->binaries_to_execute,q->inicio->binaries_num);
                         int num1 = q->inicio->binaries_num;
@@ -274,7 +273,7 @@ int main(int argc, char const *argv[]){
                             }
                             wait(NULL);
 
-                            write(task_client, "concluded!\n", strlen("concluded!\n"));     
+                            write(task_client, "concluded\n", strlen("concluded\n"));     
                             write(fifo_fd_write, request, strlen(request));       
                             _exit(0);                    
 
@@ -333,7 +332,7 @@ int main(int argc, char const *argv[]){
                         }
                     }
                     else{
-                        char* message = "pending...\n";
+                        char* message = "pending\n";
                         write(client_write, message, strlen(message)+1);
                         add_task(q, inputfile, outputfile, binaries_to_execute, number_of_commands, atoi(client_pid));
                     }

@@ -45,4 +45,4 @@ nop: bin/SDStore-transf/nop.c
 
 clean:
 	@echo "> Removing object files..."
-	rm -f obj/* sdstore sdstored
+	rm -f obj/* bin/sdstore bin/sdstored

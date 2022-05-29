@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
         //Lemos e escrevemos no terminal tudo o que o servidor quer enviar
         while(flag && (bytes_read = read(fifo_receive_fd,buffer,size_buffer)) > 0){
             buffer[bytes_read]='\0';
-            if(strcmp(buffer,"done!")==0){
+            if(strcmp(buffer,"concluded\n")==0){
                 flag = 0;
                 close(fifo_receive_fd);
             }
