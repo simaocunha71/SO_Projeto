@@ -103,9 +103,42 @@ void changeInstances(CONFIG c, char* binary, char* operation){
 }
 
 int canExecuteBinaries(CONFIG c, char** binaries_array, int number_of_commands){
+
+    CONFIG aux = copy_config(c);
+    int size = size_array(c);
+    int v[size];
+    for(int i = 0; i < size; i++){
+        v[i] = aux->max_instances;
+        aux = aux->next;
+    }
+    free_config(aux);
+    for(int i = 0; i < number_of_commands; i++){
+        if(strcmp("nop", binaries_array[i]) == 0){
+            v[0]--;
+        }
+        if(strcmp("bcompress", binaries_array[i]) == 0){
+            v[1]--;
+        }
+        if(strcmp("bdecompress", binaries_array[i]) == 0){
+            v[2]--;
+        }
+        if(strcmp("gcompress", binaries_array[i]) == 0){
+            v[3]--;
+        }
+        if(strcmp("gdecompress", binaries_array[i]) == 0){
+            v[4]--;
+        }
+        if(strcmp("encrypt", binaries_array[i]) == 0){
+            v[5]--;
+        }
+        if(strcmp("decrypt", binaries_array[i]) == 0){
+            v[6]--;
+        }
+    }
+
     int flag = 1;
-    for(int i = 0; (i < number_of_commands) && (flag == 1); i++){
-        if(match_binary_with_instances(c, binaries_array[i]) == 0){
+    for(int i = 0; (i < size) && (flag == 1); i++){
+        if(v[i] < 0){
             flag = 0;
         }    
     }
