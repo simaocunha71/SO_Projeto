@@ -199,7 +199,7 @@ int main(int argc, char const *argv[]){
                         }
                         write(task_client, "processing\n", strlen("processing\n"));
                         if(fork() == 0){
-                            sleep(10);
+                            //sleep(10);
                             if(execute_commands_in_pipeline(c,input,output,bins,num) != 0){ 
                                 perror("Erro a efetuar a execução da pipeline dos binários");
                             }
@@ -266,7 +266,7 @@ int main(int argc, char const *argv[]){
                             }
                             write(task_client, "processing\n", strlen("processing\n"));
                             if(fork() == 0){
-                                sleep(10);
+                                //sleep(10);
                                 if(execute_commands_in_pipeline(c,inputs1,outputs1,bins1,num1) != 0){ 
                                     perror("Erro a efetuar a execução da pipeline dos binários");
                                 }
@@ -321,7 +321,7 @@ int main(int argc, char const *argv[]){
                         if(fork() == 0){
                             if(fork()==0){
                                 write(client_write, "processing\n", strlen("processing\n"));
-                                sleep(10);
+                                //sleep(10);
                                 if(execute_commands_in_pipeline(c, inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
                                     perror("Erro a efetuar a execução da pipeline dos binários");
                                 }
