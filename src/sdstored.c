@@ -192,12 +192,12 @@ int main(int argc, char const *argv[]){
                         
                     my_strcat(request, "\n");
                     remove_task(q);
-                    
                     if(fork() == 0){
                         int task_client;
                         if((task_client= open(qID, O_WRONLY)) < 0){
                             perror("Erro a abrir task_client");
                         }
+                        write(task_client, "processing\n", strlen("processing\n"));
                         if(fork() == 0){
                             sleep(10);
                             if(execute_commands_in_pipeline(c,input,output,bins,num) != 0){ 
@@ -264,6 +264,7 @@ int main(int argc, char const *argv[]){
                             if((task_client= open(qID1, O_WRONLY)) < 0){
                                 perror("Erro a abrir task_client");
                             }
+                            write(task_client, "processing\n", strlen("processing\n"));
                             if(fork() == 0){
                                 sleep(10);
                                 if(execute_commands_in_pipeline(c,inputs1,outputs1,bins1,num1) != 0){ 
@@ -319,6 +320,7 @@ int main(int argc, char const *argv[]){
 
                         if(fork() == 0){
                             if(fork()==0){
+                                write(client_write, "processing\n", strlen("processing\n"));
                                 sleep(10);
                                 if(execute_commands_in_pipeline(c, inputfile,outputfile,binaries_to_execute,number_of_commands) != 0){ 
                                     perror("Erro a efetuar a execução da pipeline dos binários");
