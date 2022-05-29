@@ -1,13 +1,22 @@
 #include "includes/utilities.h"
-
-size_t readln(int fd, char* line, size_t size){
-    ssize_t bytes_read = read(fd, line, size);
-    size_t line_length = strcspn(line, "\n") + 1; 
+/*
     if(bytes_read < line_length) 
 		line_length = bytes_read;
     line[line_length] = 0;
     lseek(fd, line_length - bytes_read, SEEK_CUR);
     return bytes_read;
+}
+*/
+size_t readln(int fd, char *line, size_t size){
+  size_t i;
+  for (i=0; i<size && (read(fd, line, 1))>0; i++) {
+    if (*line=='\n') {
+      i++;
+      break;
+    }
+    line++;
+  }
+  return i;
 }
 
 int validate_binary_to_execute (char* binary_to_execute){

@@ -26,6 +26,7 @@ int main(int argc, char *argv[]){
         my_strcat(info_toSend, str_pid_client);
         my_strcat(info_toSend, " "); 
         my_strcat(info_toSend, "S");
+        my_strcat(info_toSend, "\n");
 
 
         //criamos o pipe com o pid do cliente
@@ -41,7 +42,7 @@ int main(int argc, char *argv[]){
 
 
         //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_send_fd,info_toSend,strlen(info_toSend) + 1); //strlen(x) + 1 por causa do '\0'
+        write(fifo_send_fd,info_toSend,strlen(info_toSend)); //strlen(x) + 1 por causa do '\0'
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]){
                 my_strcat(info_toSend, " ");
         }
 
+        my_strcat(info_toSend, "\n");
         //criamos o pipe com o pid do cliente
         if(mkfifo(str_pid_client, 0666) < 0)
             perror("Erro a fazer o pipe do cliente (com PID) para o servidor");
@@ -114,9 +116,10 @@ int main(int argc, char *argv[]){
         }
 
        // printf("[Cli]: Abri descritor de pid de cliente com pid\n");
-
+        write(1, info_toSend, strlen(info_toSend));
+        write(1,"\nbarra n?", strlen("\nbarra n?"));
         //Escrevemos a informação para o servidor: nome_input, nome_output, nomes dos binários a executar 
-        write(fifo_send_fd,info_toSend,strlen(info_toSend) + 1); //strlen(x) + 1 por causa do '\0'
+        write(fifo_send_fd,info_toSend,strlen(info_toSend)); //strlen(x) + 1 por causa do '\0'
 
         //fechamos o pipe cliente->servidor
         close(fifo_send_fd);
